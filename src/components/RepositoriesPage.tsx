@@ -11,7 +11,12 @@ interface Repository {
   name: string;
   url: string;
   pipelineId: string;
+  branch: string;
   status: "success" | "failed" | "running" | "unknown";
+}
+
+interface Config {
+  repositories: Repository[];
 }
 
 export const RepositoriesPage = () => {
@@ -19,16 +24,18 @@ export const RepositoriesPage = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [triggeringAll, setTriggeringAll] = useState(false);
 
-  // Mock data - in real app this would come from config.json
   useEffect(() => {
-    const mockRepos: Repository[] = [
-      { name: "frontend-app", url: "https://dev.azure.com/org/project/_git/frontend-app", pipelineId: "123", status: "success" },
-      { name: "backend-api", url: "https://dev.azure.com/org/project/_git/backend-api", pipelineId: "124", status: "failed" },
-      { name: "shared-components", url: "https://dev.azure.com/org/project/_git/shared-components", pipelineId: "125", status: "running" },
-      { name: "data-pipeline", url: "https://dev.azure.com/org/project/_git/data-pipeline", pipelineId: "126", status: "success" },
-      { name: "auth-service", url: "https://dev.azure.com/org/project/_git/auth-service", pipelineId: "127", status: "unknown" },
-    ];
-    setRepositories(mockRepos);
+    const loadConfig = async () => {
+      try {
+        const response = await fetch('/config.json');
+        const config: Config = await response.json();
+        setRepositories(config.repositories);
+      } catch (error) {
+        console.error('Failed to load config:', error);
+      }
+    };
+    
+    loadConfig();
   }, []);
 
   const refreshStatuses = async () => {

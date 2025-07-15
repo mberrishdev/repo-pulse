@@ -1,81 +1,77 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Download, Edit } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const mockConfig = {
+interface Config {
   azureDevOps: {
-    organization: "myorg",
-    project: "myproject",
-    personalAccessToken: "***hidden***"
-  },
-  repositories: [
-    {
-      name: "frontend-app",
-      url: "https://dev.azure.com/myorg/myproject/_git/frontend-app",
-      pipelineId: "123",
-      branch: "main"
-    },
-    {
-      name: "backend-api", 
-      url: "https://dev.azure.com/myorg/myproject/_git/backend-api",
-      pipelineId: "124",
-      branch: "main"
-    },
-    {
-      name: "shared-components",
-      url: "https://dev.azure.com/myorg/myproject/_git/shared-components", 
-      pipelineId: "125",
-      branch: "main"
-    },
-    {
-      name: "data-pipeline",
-      url: "https://dev.azure.com/myorg/myproject/_git/data-pipeline",
-      pipelineId: "126", 
-      branch: "main"
-    },
-    {
-      name: "auth-service",
-      url: "https://dev.azure.com/myorg/myproject/_git/auth-service",
-      pipelineId: "127",
-      branch: "main"
-    }
-  ],
+    organization: string;
+    project: string;
+    personalAccessToken: string;
+  };
+  repositories: Array<{
+    name: string;
+    url: string;
+    pipelineId: string;
+    branch: string;
+  }>;
   renovate: {
-    enabled: true,
-    botName: "renovate[bot]",
-    autoMerge: false
-  }
-};
+    enabled: boolean;
+    botName: string;
+    autoMerge: boolean;
+  };
+}
 
 export const SettingsPage = () => {
-  const [config] = useState(mockConfig);
+  const [config, setConfig] = useState<Config | null>(null);
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const response = await fetch('/config.json');
+        const configData: Config = await response.json();
+        setConfig(configData);
+      } catch (error) {
+        console.error('Failed to load config:', error);
+      }
+    };
+    
+    loadConfig();
+  }, []);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(JSON.stringify(config, null, 2));
-    toast({
-      title: "Copied to Clipboard",
-      description: "Configuration has been copied to clipboard.",
-    });
+    if (config) {
+      navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+      toast({
+        title: "Copied to Clipboard",
+        description: "Configuration has been copied to clipboard.",
+      });
+    }
   };
 
   const downloadConfig = () => {
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'config.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Config Downloaded",
-      description: "Configuration file has been downloaded.",
-    });
+    if (config) {
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'config.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Config Downloaded",
+        description: "Configuration file has been downloaded.",
+      });
+    }
   };
+
+  if (!config) {
+    return <div>Loading configuration...</div>;
+  }
 
   return (
     <div className="space-y-6">

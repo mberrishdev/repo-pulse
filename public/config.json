@@ -1,0 +1,80 @@
+
+{
+  "azureDevOps": {
+    "organization": "myorg",
+    "project": "myproject",
+    "personalAccessToken": "***hidden***"
+  },
+  "repositories": [
+    {
+      "name": "frontend-app",
+      "url": "https://dev.azure.com/myorg/myproject/_git/frontend-app",
+      "pipelineId": "123",
+      "branch": "main",
+      "status": "success"
+    },
+    {
+      "name": "backend-api",
+      "url": "https://dev.azure.com/myorg/myproject/_git/backend-api",
+      "pipelineId": "124",
+      "branch": "main",
+      "status": "failed"
+    },
+    {
+      "name": "shared-components",
+      "url": "https://dev.azure.com/myorg/myproject/_git/shared-components",
+      "pipelineId": "125",
+      "branch": "main",
+      "status": "running"
+    },
+    {
+      "name": "data-pipeline",
+      "url": "https://dev.azure.com/myorg/myproject/_git/data-pipeline",
+      "pipelineId": "126",
+      "branch": "main",
+      "status": "success"
+    },
+    {
+      "name": "auth-service",
+      "url": "https://dev.azure.com/myorg/myproject/_git/auth-service",
+      "pipelineId": "127",
+      "branch": "main",
+      "status": "unknown"
+    }
+  ],
+  "renovate": {
+    "enabled": true,
+    "botName": "renovate[bot]",
+    "autoMerge": false
+  },
+  "pullRequests": [
+    {
+      "id": "1",
+      "title": "Update dependency @types/node to v20.10.0",
+      "repositories": ["frontend-app", "backend-api"],
+      "status": "draft",
+      "validationStatus": "unknown"
+    },
+    {
+      "id": "2",
+      "title": "Update dependency typescript to v5.3.0",
+      "repositories": ["frontend-app", "shared-components", "auth-service"],
+      "status": "active",
+      "validationStatus": "running"
+    },
+    {
+      "id": "3",
+      "title": "Update dependency react to v18.2.0",
+      "repositories": ["frontend-app", "shared-components"],
+      "status": "draft",
+      "validationStatus": "unknown"
+    },
+    {
+      "id": "4",
+      "title": "Update dependency express to v4.18.0",
+      "repositories": ["backend-api", "auth-service"],
+      "status": "active",
+      "validationStatus": "success"
+    }
+  ]
+}

@@ -15,43 +15,26 @@ interface PullRequest {
   validationStatus: "success" | "failed" | "running" | "unknown";
 }
 
+interface Config {
+  pullRequests: PullRequest[];
+}
+
 export const RenovatePage = () => {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock data - in real app this would query Azure DevOps API
   useEffect(() => {
-    const mockPRs: PullRequest[] = [
-      {
-        id: "1",
-        title: "Update dependency @types/node to v20.10.0",
-        repositories: ["frontend-app", "backend-api"],
-        status: "draft",
-        validationStatus: "unknown"
-      },
-      {
-        id: "2", 
-        title: "Update dependency typescript to v5.3.0",
-        repositories: ["frontend-app", "shared-components", "auth-service"],
-        status: "active",
-        validationStatus: "running"
-      },
-      {
-        id: "3",
-        title: "Update dependency react to v18.2.0",
-        repositories: ["frontend-app", "shared-components"],
-        status: "draft",
-        validationStatus: "unknown"
-      },
-      {
-        id: "4",
-        title: "Update dependency express to v4.18.0",
-        repositories: ["backend-api", "auth-service"],
-        status: "active",
-        validationStatus: "success"
-      },
-    ];
-    setPullRequests(mockPRs);
+    const loadConfig = async () => {
+      try {
+        const response = await fetch('/config.json');
+        const config: Config = await response.json();
+        setPullRequests(config.pullRequests);
+      } catch (error) {
+        console.error('Failed to load config:', error);
+      }
+    };
+    
+    loadConfig();
   }, []);
 
   const refreshPRs = async () => {
