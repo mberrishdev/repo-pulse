@@ -16,19 +16,109 @@ interface PullRequest {
 }
 
 interface Config {
-  pullRequests: PullRequest[];
+  azureDevOps: {
+    organization: string;
+    project: string;
+    personalAccessToken: string;
+  };
+  repositories: Array<{
+    name: string;
+    url: string;
+    pipelineId: string;
+    branch: string;
+    status: string;
+  }>;
+  renovate: {
+    enabled: boolean;
+    botName: string;
+    autoMerge: boolean;
+  };
+}
+
+interface AzureDevOpsPR {
+  pullRequestId: number;
+  title: string;
+  status: string;
+  createdBy: {
+    displayName: string;
+    uniqueName: string;
+  };
+  repository: {
+    name: string;
+  };
 }
 
 export const RenovatePage = () => {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [config, setConfig] = useState<Config | null>(null);
+
+  const fetchRenovatePRs = async (config: Config) => {
+    if (!config.renovate.enabled) return [];
+
+    const groupedPRs: Record<string, PullRequest> = {};
+
+    for (const repo of config.repositories) {
+      try {
+        // Simulate Azure DevOps API call
+        const mockPRs: AzureDevOpsPR[] = [
+          {
+            pullRequestId: Math.floor(Math.random() * 1000),
+            title: "Update dependency @types/node to v20.10.0",
+            status: Math.random() > 0.5 ? "draft" : "active",
+            createdBy: { displayName: "renovate[bot]", uniqueName: "renovate@bot.com" },
+            repository: { name: repo.name }
+          },
+          {
+            pullRequestId: Math.floor(Math.random() * 1000),
+            title: "Update dependency typescript to v5.3.0", 
+            status: Math.random() > 0.5 ? "draft" : "active",
+            createdBy: { displayName: "renovate[bot]", uniqueName: "renovate@bot.com" },
+            repository: { name: repo.name }
+          }
+        ];
+
+        // Filter for Renovate PRs
+        const renovatePRs = mockPRs.filter(pr => 
+          pr.createdBy.displayName.toLowerCase().includes('renovate') ||
+          pr.createdBy.uniqueName.toLowerCase().includes('renovate')
+        );
+
+        // Group by title
+        renovatePRs.forEach(pr => {
+          if (!groupedPRs[pr.title]) {
+            groupedPRs[pr.title] = {
+              id: pr.title.replace(/\s+/g, '-').toLowerCase(),
+              title: pr.title,
+              repositories: [],
+              status: pr.status as "draft" | "active",
+              validationStatus: "unknown" as const
+            };
+          }
+          
+          if (!groupedPRs[pr.title].repositories.includes(pr.repository.name)) {
+            groupedPRs[pr.title].repositories.push(pr.repository.name);
+          }
+        });
+      } catch (error) {
+        console.error(`Failed to fetch PRs for ${repo.name}:`, error);
+      }
+    }
+
+    return Object.values(groupedPRs);
+  };
 
   useEffect(() => {
     const loadConfig = async () => {
       try {
         const response = await fetch('/config.json');
-        const config: Config = await response.json();
-        setPullRequests(config.pullRequests);
+        const configData: Config = await response.json();
+        setConfig(configData);
+        
+        if (configData.renovate.enabled) {
+          const renovatePRs = await fetchRenovatePRs(configData);
+          setPullRequests(renovatePRs);
+        }
       } catch (error) {
         console.error('Failed to load config:', error);
       }
@@ -38,13 +128,25 @@ export const RenovatePage = () => {
   }, []);
 
   const refreshPRs = async () => {
+    if (!config) return;
+    
     setIsRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsRefreshing(false);
-    toast({
-      title: "PRs Refreshed",
-      description: "Renovate pull requests have been updated.",
-    });
+    try {
+      const renovatePRs = await fetchRenovatePRs(config);
+      setPullRequests(renovatePRs);
+      toast({
+        title: "PRs Refreshed",
+        description: "Renovate pull requests have been updated from Azure DevOps.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh pull requests.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const publishPR = async (prId: string, prTitle: string) => {
