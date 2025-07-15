@@ -14,6 +14,7 @@ interface PullRequest {
   status: "draft" | "active";
   validationStatus: "success" | "failed" | "running" | "unknown";
   prUrl: string;
+  lastMergeSourceCommit: Record<string, string>;
 }
 
 interface Config {
@@ -50,7 +51,18 @@ interface AzureDevOpsPR {
   };
   url: string; // Added url to AzureDevOpsPR
   isDraft: boolean; // Added isDraft to AzureDevOpsPR
+  lastMergeSourceCommit: {
+    commitId: string;
+  };
+  reviewers?: Array<{
+    vote: number;
+    reviewer: {
+      displayName: string;
+      uniqueName: string;
+    };
+  }>;
 }
+
 
 export const RenovatePage = () => {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([]);
@@ -109,11 +121,13 @@ export const RenovatePage = () => {
               status: prStatus,
               validationStatus: "unknown" as const,
               prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`,
+              lastMergeSourceCommit: {},
             };
           }
           if (!groupedPRs[pr.title].repositories.includes(pr.repository.name)) {
             groupedPRs[pr.title].repositories.push(pr.repository.name);
           }
+          groupedPRs[pr.title].lastMergeSourceCommit[pr.repository.name] = pr.lastMergeSourceCommit?.commitId || "";
         });
       } catch (error) {
         console.error(`Failed to fetch PRs for ${repo.name}:`, error);
@@ -164,27 +178,102 @@ export const RenovatePage = () => {
     }
   };
 
-  const publishPR = async (prId: string, prTitle: string) => {
-    // Update PR status to active and trigger validation
-    setPullRequests(prev => prev.map(pr => 
-      pr.id === prId 
-        ? { ...pr, status: "active" as const, validationStatus: "running" as const }
-        : pr
-    ));
+  const publishPR = async (prId: string, prTitle: string, repoNames: string[]) => {
+    if (!config) return;
+    let allSuccess = true;
+    for (const repoName of repoNames) {
+      const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullRequests/${prId}?api-version=6.0`;
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ isDraft: false }),
+        });
+        if (!response.ok) {
+          allSuccess = false;
+          toast({
+            title: "Error",
+            description: `Failed to publish PR for ${repoName}.`,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        allSuccess = false;
+        toast({
+          title: "Error",
+          description: `Failed to publish PR for ${repoName}.`,
+          variant: "destructive",
+        });
+      }
+    }
+    if (allSuccess) {
+      toast({
+        title: "PR Published",
+        description: `"${prTitle}" has been published for all affected repositories.`,
+      });
+    }
+    // Optionally, refresh PRs after publishing
+    refreshPRs();
+  };
 
+  const publishAllPRs = async () => {
+    for (const pr of pullRequests) {
+      await publishPR(pr.id, pr.title, pr.repositories);
+    }
+  };
+
+  const handleAdd = (pr: PullRequest) => {
     toast({
-      title: "PR Published",
-      description: `"${prTitle}" has been published and validation pipeline triggered.`,
+      title: "Add Action",
+      description: `Add action triggered for PR: ${pr.title}`,
     });
+  };
 
-    // Simulate pipeline completion
-    setTimeout(() => {
-      setPullRequests(prev => prev.map(pr => 
-        pr.id === prId 
-          ? { ...pr, validationStatus: Math.random() > 0.3 ? "success" as const : "failed" as const }
-          : pr
-      ));
-    }, 3000);
+  const handleComplete = async (pr: PullRequest) => {
+    if (!config) return;
+    let allSuccess = true;
+    for (const repoName of pr.repositories) {
+      const commitId = pr.lastMergeSourceCommit[repoName];
+      const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullRequests/${pr.id}?api-version=6.0`;
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: "completed",
+            lastMergeSourceCommit: { commitId },
+          }),
+        });
+        if (!response.ok) {
+          allSuccess = false;
+          toast({
+            title: "Error",
+            description: `Failed to complete PR for ${repoName}.`,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        allSuccess = false;
+        toast({
+          title: "Error",
+          description: `Failed to complete PR for ${repoName}.`,
+          variant: "destructive",
+        });
+      }
+    }
+    if (allSuccess) {
+      toast({
+        title: "PR Completed",
+        description: `Pull request has been merged for all affected repositories.`,
+      });
+    }
+    refreshPRs();
   };
 
   return (
@@ -194,15 +283,24 @@ export const RenovatePage = () => {
           <h1 className="text-2xl font-bold text-gray-900">Renovate PRs</h1>
           <p className="text-gray-600 mt-1">Manage Renovate dependency update pull requests</p>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={refreshPRs} 
-          disabled={isRefreshing}
-          className="flex items-center space-x-2"
-        >
-          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          <span>Refresh PRs</span>
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={refreshPRs} 
+            disabled={isRefreshing}
+            className="flex items-center space-x-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>Refresh PRs</span>
+          </Button>
+          <Button
+            onClick={publishAllPRs}
+            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
+          >
+            <Send className="w-4 h-4" />
+            <span>Publish All PRs</span>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4">
@@ -230,7 +328,7 @@ export const RenovatePage = () => {
                   <StatusIndicator status={pr.validationStatus} showLabel />
                   {pr.status === "draft" && (
                     <Button 
-                      onClick={() => publishPR(pr.id, pr.title)}
+                      onClick={() => publishPR(pr.id, pr.title, pr.repositories)}
                       className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
                     >
                       <Send className="w-4 h-4" />
@@ -244,21 +342,31 @@ export const RenovatePage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-2">Affected Repositories:</p>
                 <div className="flex flex-wrap gap-2">
-                  {pr.repositories.map((repo) => (
-                    <span key={repo} className="flex items-center gap-1">
-                      <Badge variant="outline" className="text-xs">
-                        {repo}
-                      </Badge>
-                      <button
-                        type="button"
-                        onClick={() => window.open(pr.prUrl, "_blank", "noopener,noreferrer")}
-                        className="p-0.5 rounded hover:bg-gray-200"
-                        title="Open PR in Azure DevOps"
-                      >
-                        <ExternalLink className="w-4 h-4 text-blue-600" />
-                      </button>
-                    </span>
-                  ))}
+                  {pr.repositories.map((repo) => {
+                    // Find repo config
+                    const repoConfig = config?.repositories.find(r => r.name === repo);
+                    const pipelineUrl = repoConfig
+                      ? `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repoConfig.pipelineId}&branchName=${encodeURIComponent(repoConfig.branch)}`
+                      : null;
+                    return (
+                      <span key={repo} className="flex items-center gap-1">
+                        <Badge variant="outline" className="text-xs">
+                          {repo}
+                        </Badge>
+                        {pipelineUrl && (
+                          <a
+                            href={pipelineUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-0.5 rounded hover:bg-gray-200"
+                            title="View Build Pipeline"
+                          >
+                            <ExternalLink className="w-4 h-4 text-blue-600" />
+                          </a>
+                        )}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </CardContent>
