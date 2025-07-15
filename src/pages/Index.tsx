@@ -1,12 +1,31 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { Routes, Route } from "react-router-dom";
+import { RepositoriesPage } from "@/components/RepositoriesPage";
+import { RenovatePage } from "@/components/RenovatePage";
+import { SettingsPage } from "@/components/SettingsPage";
+import { Header } from "@/components/Header";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col">
+            <Header />
+            <main className="flex-1 p-6">
+              <Routes>
+                <Route path="/" element={<RepositoriesPage />} />
+                <Route path="/repositories" element={<RepositoriesPage />} />
+                <Route path="/renovate" element={<RenovatePage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+              </Routes>
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
     </div>
   );
 };
