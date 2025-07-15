@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusIndicator } from "@/components/StatusIndicator";
-import { GitPullRequest, Send, RefreshCw } from "lucide-react";
+import { GitPullRequest, Send, RefreshCw, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface PullRequest {
@@ -13,6 +13,7 @@ interface PullRequest {
   repositories: string[];
   status: "draft" | "active";
   validationStatus: "success" | "failed" | "running" | "unknown";
+  prUrl: string;
 }
 
 interface Config {
@@ -47,6 +48,8 @@ interface AzureDevOpsPR {
   repository: {
     name: string;
   };
+  url: string; // Added url to AzureDevOpsPR
+  isDraft: boolean; // Added isDraft to AzureDevOpsPR
 }
 
 export const RenovatePage = () => {
@@ -97,16 +100,17 @@ export const RenovatePage = () => {
 
         // Group by title
         renovatePRs.forEach(pr => {
+          const prStatus = pr.isDraft ? "draft" : "active";
           if (!groupedPRs[pr.title]) {
             groupedPRs[pr.title] = {
               id: pr.pullRequestId.toString(),
               title: pr.title,
               repositories: [],
-              status: pr.status as "draft" | "active",
-              validationStatus: "unknown" as const
+              status: prStatus,
+              validationStatus: "unknown" as const,
+              prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`,
             };
           }
-          
           if (!groupedPRs[pr.title].repositories.includes(pr.repository.name)) {
             groupedPRs[pr.title].repositories.push(pr.repository.name);
           }
@@ -241,9 +245,19 @@ export const RenovatePage = () => {
                 <p className="text-sm font-medium text-gray-700 mb-2">Affected Repositories:</p>
                 <div className="flex flex-wrap gap-2">
                   {pr.repositories.map((repo) => (
-                    <Badge key={repo} variant="outline" className="text-xs">
-                      {repo}
-                    </Badge>
+                    <span key={repo} className="flex items-center gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        {repo}
+                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => window.open(pr.prUrl, "_blank", "noopener,noreferrer")}
+                        className="p-0.5 rounded hover:bg-gray-200"
+                        title="Open PR in Azure DevOps"
+                      >
+                        <ExternalLink className="w-4 h-4 text-blue-600" />
+                      </button>
+                    </span>
                   ))}
                 </div>
               </div>
