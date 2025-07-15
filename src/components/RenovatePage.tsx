@@ -60,35 +60,39 @@ export const RenovatePage = () => {
 
     for (const repo of config.repositories) {
       try {
-        // Simulate Azure DevOps API call
-        const mockPRs: AzureDevOpsPR[] = [
-          {
-            pullRequestId: Math.floor(Math.random() * 1000),
-            title: "Update dependency @types/node to v20.10.0",
-            status: Math.random() > 0.5 ? "draft" : "active",
-            createdBy: { displayName: "renovate[bot]", uniqueName: "renovate@bot.com" },
-            repository: { name: repo.name }
+        // Extract repository name from URL or use name directly
+        const repoName = repo.name;
+        
+        // Azure DevOps REST API call
+        const apiUrl = `https://dev.azure.com/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?searchCriteria.status=active&searchCriteria.status=draft&api-version=6.0`;
+        
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+            'Content-Type': 'application/json',
           },
-          {
-            pullRequestId: Math.floor(Math.random() * 1000),
-            title: "Update dependency typescript to v5.3.0", 
-            status: Math.random() > 0.5 ? "draft" : "active",
-            createdBy: { displayName: "renovate[bot]", uniqueName: "renovate@bot.com" },
-            repository: { name: repo.name }
-          }
-        ];
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const pullRequests: AzureDevOpsPR[] = data.value || [];
 
         // Filter for Renovate PRs
-        const renovatePRs = mockPRs.filter(pr => 
+        const renovatePRs = pullRequests.filter(pr => 
           pr.createdBy.displayName.toLowerCase().includes('renovate') ||
-          pr.createdBy.uniqueName.toLowerCase().includes('renovate')
+          pr.createdBy.uniqueName.toLowerCase().includes('renovate') ||
+          config.renovate.botName.toLowerCase() === pr.createdBy.displayName.toLowerCase()
         );
 
         // Group by title
         renovatePRs.forEach(pr => {
           if (!groupedPRs[pr.title]) {
             groupedPRs[pr.title] = {
-              id: pr.title.replace(/\s+/g, '-').toLowerCase(),
+              id: pr.pullRequestId.toString(),
               title: pr.title,
               repositories: [],
               status: pr.status as "draft" | "active",
