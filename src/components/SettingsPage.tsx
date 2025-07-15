@@ -11,6 +11,7 @@ interface Config {
     organization: string;
     project: string;
     personalAccessToken: string;
+    baseUrl: string;
   };
   repositories: Array<{
     name: string;
@@ -148,7 +149,7 @@ export const SettingsPage = () => {
                   </div>
                   <div className="mt-2">
                     <label className="text-sm font-medium text-gray-700">URL</label>
-                    <p className="text-gray-600 text-sm break-all">{repo.url}</p>
+                    <p className="text-gray-600 text-sm break-all">{repo.url.startsWith('http') ? repo.url : `${config.azureDevOps.baseUrl}${repo.url}`}</p>
                   </div>
                 </div>
               ))}

@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { StatusIndicator } from "@/components/StatusIndicator";
 import { ExternalLink, Play, RefreshCw, PlayCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -17,10 +16,13 @@ interface Repository {
 
 interface Config {
   repositories: Repository[];
+  azureDevOps: {
+    baseUrl: string;
+  };
 }
 
 export const RepositoriesPage = () => {
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [config, setConfig] = useState<Config | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [triggeringAll, setTriggeringAll] = useState(false);
 
@@ -28,13 +30,12 @@ export const RepositoriesPage = () => {
     const loadConfig = async () => {
       try {
         const response = await fetch('/config.json');
-        const config: Config = await response.json();
-        setRepositories(config.repositories);
+        const configData: Config = await response.json();
+        setConfig(configData);
       } catch (error) {
         console.error('Failed to load config:', error);
       }
     };
-    
     loadConfig();
   }, []);
 
@@ -42,13 +43,14 @@ export const RepositoriesPage = () => {
     setIsRefreshing(true);
     // Mock API call
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
     // Simulate status updates
-    setRepositories(prev => prev.map(repo => ({
-      ...repo,
-      status: Math.random() > 0.3 ? "success" : Math.random() > 0.5 ? "failed" : "running"
-    })));
-    
+    setConfig(prev => prev ? {
+      ...prev,
+      repositories: prev.repositories.map(repo => ({
+        ...repo,
+        status: Math.random() > 0.3 ? "success" : Math.random() > 0.5 ? "failed" : "running"
+      }))
+    } : prev);
     setIsRefreshing(false);
     toast({
       title: "Status Updated",
@@ -60,10 +62,11 @@ export const RepositoriesPage = () => {
     setTriggeringAll(true);
     // Mock API call
     await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    setRepositories(prev => prev.map(repo => ({ ...repo, status: "running" })));
+    setConfig(prev => prev ? {
+      ...prev,
+      repositories: prev.repositories.map(repo => ({ ...repo, status: "running" }))
+    } : prev);
     setTriggeringAll(false);
-    
     toast({
       title: "Pipelines Triggered",
       description: "All CI pipelines have been triggered successfully.",
@@ -71,15 +74,19 @@ export const RepositoriesPage = () => {
   };
 
   const triggerSinglePipeline = async (repoName: string) => {
-    setRepositories(prev => prev.map(repo => 
-      repo.name === repoName ? { ...repo, status: "running" } : repo
-    ));
-    
+    setConfig(prev => prev ? {
+      ...prev,
+      repositories: prev.repositories.map(repo =>
+        repo.name === repoName ? { ...repo, status: "running" } : repo
+      )
+    } : prev);
     toast({
       title: "Pipeline Triggered",
       description: `CI pipeline for ${repoName} has been triggered.`,
     });
   };
+
+  if (!config) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6">
@@ -110,7 +117,7 @@ export const RepositoriesPage = () => {
       </div>
 
       <div className="grid gap-4">
-        {repositories.map((repo) => (
+        {config.repositories.map((repo) => (
           <Card key={repo.name} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -119,7 +126,7 @@ export const RepositoriesPage = () => {
                     <div className="flex items-center space-x-2">
                       <h3 className="font-semibold text-lg text-gray-900">{repo.name}</h3>
                       <a 
-                        href={repo.url} 
+                        href={repo.url.startsWith('http') ? repo.url : `${config.azureDevOps.baseUrl}${repo.url}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-600"

@@ -20,6 +20,7 @@ interface Config {
     organization: string;
     project: string;
     personalAccessToken: string;
+    baseUrl: string; // Added baseUrl to config
   };
   repositories: Array<{
     name: string;
@@ -58,13 +59,15 @@ export const RenovatePage = () => {
 
     const groupedPRs: Record<string, PullRequest> = {};
 
+    console.log(config.repositories);
     for (const repo of config.repositories) {
       try {
         // Extract repository name from URL or use name directly
         const repoName = repo.name;
         
         // Azure DevOps REST API call
-        const apiUrl = `https://dev.azure.com/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?searchCriteria.status=active&searchCriteria.status=draft&api-version=6.0`;
+        // const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?searchCriteria.status=active&searchCriteria.status=draft&api-version=6.0`;
+        const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?api-version=6.0`;
         
         const response = await fetch(apiUrl, {
           method: 'GET',
@@ -81,12 +84,16 @@ export const RenovatePage = () => {
         const data = await response.json();
         const pullRequests: AzureDevOpsPR[] = data.value || [];
 
+        console.log(data.value);
+        
         // Filter for Renovate PRs
-        const renovatePRs = pullRequests.filter(pr => 
-          pr.createdBy.displayName.toLowerCase().includes('renovate') ||
-          pr.createdBy.uniqueName.toLowerCase().includes('renovate') ||
-          config.renovate.botName.toLowerCase() === pr.createdBy.displayName.toLowerCase()
-        );
+        // const renovatePRs = pullRequests.filter(pr => 
+        //   pr.createdBy.displayName.toLowerCase().includes('renovate') ||
+        //   pr.createdBy.uniqueName.toLowerCase().includes('renovate') ||
+        //   config.renovate.botName.toLowerCase() === pr.createdBy.displayName.toLowerCase()
+        // );
+
+        const renovatePRs = pullRequests;
 
         // Group by title
         renovatePRs.forEach(pr => {
