@@ -21,6 +21,12 @@ interface PullRequestRepository {
   branch: string;
   prUrl: string;
   status: string
+  buildStatus: {
+    id: number,
+    status: string,
+    result: string,
+    url: string
+  } | null;
 }
 
 interface Config {
@@ -109,9 +115,8 @@ export const RenovatePage = () => {
         );
 
         // Group by title
-        renovatePRs.forEach(pr => {
+        for (const pr of renovatePRs) {
           const prStatus = pr.isDraft ? "draft" : "active";
-          console.log(pr.title, pr.isDraft)
           if (!groupedPRs[pr.title]) {
             groupedPRs[pr.title] = {
               id: pr.pullRequestId.toString(),
@@ -122,15 +127,42 @@ export const RenovatePage = () => {
               lastMergeSourceCommit: {},
             };
           }
+          const buildUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/build/builds?branchName=refs/pull/${pr.pullRequestId}/merge&$top=1&api-version=7.1`;
+
+          const buildResponse = await fetch(buildUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+              'Content-Type': 'application/json',
+            }
+          });
+
+          let buildStatus = null;
+          if (buildResponse.ok) {
+            const buildData = await buildResponse.json();
+            const latestBuild = buildData.value?.[0];
+            if (latestBuild) {
+              buildStatus = {
+                id: latestBuild.id,
+                status: latestBuild.status,
+                result: latestBuild.result,
+                url: latestBuild._links.web.href
+              };
+            }
+          }
+
+
+          console.log(buildStatus);
           const pullRequestRepository = {
             name: pr.repository.name,
             prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`,
             branch: pr.sourceRefName,
-            status: prStatus
+            status: prStatus,
+            buildStatus: buildStatus
           }
           groupedPRs[pr.title].repositories.push(pullRequestRepository);
           groupedPRs[pr.title].lastMergeSourceCommit[pr.repository.name] = pr.lastMergeSourceCommit?.commitId || "";
-        });
+        };
       } catch (error) {
         console.error(`Failed to fetch PRs for ${repo.name}:`, error);
       }
@@ -269,6 +301,21 @@ export const RenovatePage = () => {
                               <ExternalLink className="w-4 h-4 text-blue-600" />
                             </a>
                           </Badge>
+
+                          {repo.buildStatus && (
+                            <div className="flex items-center gap-2 text-sm text-gray-700">
+                              <Badge
+                                variant="outline"
+                              >
+                                <a href={repo.buildStatus.url} target="_blank" rel="noopener noreferrer" className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1">
+                                  Build {repo.buildStatus.result}
+                                  <ExternalLink className="w-4 h-4 text-blue-600" />
+                                </a>
+                              </Badge>
+
+                            </div>
+                          )}
+
                           <Button
                             size="sm"
                             variant="outline"
@@ -283,6 +330,7 @@ export const RenovatePage = () => {
                             Update from master
                           </Button>
                         </div>
+
                       </div>
                     );
                   })}
