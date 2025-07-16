@@ -239,7 +239,7 @@ export const RenovatePage = () => {
                       ? `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repoConfig.pipelineId}&branchName=${encodeURIComponent(repoConfig.branch)}`
                       : null;
                     return (
-                      <div key={repo.name} className="flex flex-col gap-1 border rounded p-2 bg-gray-50 min-w-[200px]">
+                      <div key={repo.name} className="flex flex-col gap-1 border rounded p-2 bg-gray-50 min-w-[220px]">
                         <div className="flex items-center gap-1">
                           <Badge variant="outline" className="text-xs">
                             <a href={repo.prUrl} target="_blank" rel="noopener noreferrer" className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1">
@@ -259,8 +259,11 @@ export const RenovatePage = () => {
                             </a>
                           )} */}
                         </div>
-                        <div className="text-xs text-gray-700 mt-1 whitespace-pre-line">
-                          {pr.description || "No description."}
+                        <div className="mt-2">
+                          <div className="text-[11px] font-semibold text-gray-500 mb-1">PR Description</div>
+                          <blockquote className="bg-white border-l-4 border-blue-400 p-2 rounded text-xs text-gray-800 whitespace-pre-line shadow-sm">
+                            {pr.description ? pr.description : <span className="italic text-gray-400">No description.</span>}
+                          </blockquote>
                         </div>
                       </div>
                     );
