@@ -10,26 +10,22 @@ export const LandingPage = () => {
     {
       icon: GitBranch,
       title: "Repository Management",
-      description: "Monitor and manage all your repositories from a single dashboard with real-time status updates.",
-      color: "text-blue-500 dark:text-blue-400"
+      description: "Monitor and manage all your repositories from a single dashboard with real-time status updates."
     },
     {
       icon: Bot,
       title: "Automated Renovate",
-      description: "Keep dependencies up-to-date with automated pull requests from Renovate bot integration.",
-      color: "text-green-500 dark:text-green-400"
+      description: "Keep dependencies up-to-date with automated pull requests from Renovate bot integration."
     },
     {
       icon: Shield,
       title: "Security Monitoring",
-      description: "Track security vulnerabilities and compliance across all your repositories.",
-      color: "text-red-500 dark:text-red-400"
+      description: "Track security vulnerabilities and compliance across all your repositories."
     },
     {
       icon: BarChart3,
       title: "Analytics & Insights",
-      description: "Get detailed insights into your repository health, activity, and dependency trends.",
-      color: "text-purple-500 dark:text-purple-400"
+      description: "Get detailed insights into your repository health, activity, and dependency trends."
     }
   ];
 
@@ -46,20 +42,20 @@ export const LandingPage = () => {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-gradient-start to-gradient-end rounded-lg flex items-center justify-center">
-              <GitBranch className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-foreground rounded-lg flex items-center justify-center">
+              <GitBranch className="w-5 h-5 text-background" />
             </div>
             <h1 className="text-xl font-bold">RepoPulse</h1>
           </div>
           <div className="flex items-center space-x-4">
             <nav className="hidden md:flex items-center space-x-6">
-              <Link to="/repositories" className="text-sm font-medium hover:text-primary transition-colors">
+              <Link to="/repositories" className="text-sm font-medium hover:text-foreground/70 transition-colors">
                 Repositories
               </Link>
-              <Link to="/renovate" className="text-sm font-medium hover:text-primary transition-colors">
+              <Link to="/renovate" className="text-sm font-medium hover:text-foreground/70 transition-colors">
                 Renovate
               </Link>
-              <Link to="/settings" className="text-sm font-medium hover:text-primary transition-colors">
+              <Link to="/settings" className="text-sm font-medium hover:text-foreground/70 transition-colors">
                 Settings
               </Link>
             </nav>
@@ -71,14 +67,14 @@ export const LandingPage = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-20">
         <div className="text-center max-w-4xl mx-auto">
-          <Badge variant="secondary" className="mb-6 bg-gradient-to-r from-gradient-start to-gradient-end text-white border-0">
+          <Badge variant="secondary" className="mb-6">
             <Zap className="w-4 h-4 mr-2" />
             Repository Intelligence Platform
           </Badge>
           
           <h1 className="text-6xl font-bold text-foreground mb-6 leading-tight">
             Streamline Your
-            <span className="bg-gradient-to-r from-gradient-start to-gradient-end bg-clip-text text-transparent"> Repository Management</span>
+            <span className="text-foreground"> Repository Management</span>
           </h1>
           
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
@@ -87,13 +83,13 @@ export const LandingPage = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button asChild size="lg" className="text-lg px-8 bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity">
+            <Button asChild size="lg" className="text-lg px-8">
               <Link to="/repositories">
                 Get Started
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-8 border-gradient-start text-gradient-start hover:bg-gradient-start hover:text-white transition-colors">
+            <Button asChild variant="outline" size="lg" className="text-lg px-8">
               <Link to="/settings">
                 <Settings className="mr-2 w-5 h-5" />
                 Configure
@@ -103,20 +99,20 @@ export const LandingPage = () => {
 
           {/* Hero Image Placeholder */}
           <div className="relative mx-auto max-w-4xl">
-            <div className="relative bg-gradient-to-br from-card to-muted/20 rounded-2xl shadow-2xl p-8 border backdrop-blur-sm">
+            <div className="relative bg-card rounded-2xl shadow-2xl p-8 border">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
-                  <div className="h-4 bg-gradient-to-r from-gradient-start to-transparent rounded"></div>
+                  <div className="h-4 bg-muted rounded"></div>
                   <div className="h-4 bg-muted/50 rounded w-3/4"></div>
                   <div className="h-4 bg-muted/50 rounded w-1/2"></div>
                 </div>
                 <div className="space-y-3">
-                  <div className="h-4 bg-gradient-to-r from-gradient-end to-transparent rounded"></div>
+                  <div className="h-4 bg-muted rounded"></div>
                   <div className="h-4 bg-muted/50 rounded w-2/3"></div>
                   <div className="h-4 bg-muted/50 rounded w-3/4"></div>
                 </div>
                 <div className="space-y-3">
-                  <div className="h-4 bg-gradient-to-r from-primary to-transparent rounded"></div>
+                  <div className="h-4 bg-muted rounded"></div>
                   <div className="h-4 bg-muted/50 rounded w-1/2"></div>
                   <div className="h-4 bg-muted/50 rounded w-2/3"></div>
                 </div>
@@ -130,14 +126,14 @@ export const LandingPage = () => {
       <section className="container mx-auto px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
-            <Card key={index} className="text-center border-0 bg-card/50 backdrop-blur-sm">
+            <Card key={index} className="text-center bg-card">
               <CardContent className="pt-6">
                 <div className="flex justify-center mb-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-gradient-start to-gradient-end rounded-lg flex items-center justify-center">
-                    <stat.icon className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 bg-foreground rounded-lg flex items-center justify-center">
+                    <stat.icon className="w-6 h-6 text-background" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-stats-text mb-2">{stat.value}</div>
+                <div className="text-3xl font-bold text-foreground mb-2">{stat.value}</div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
               </CardContent>
             </Card>
@@ -159,10 +155,10 @@ export const LandingPage = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <Card key={index} className="border-0 bg-feature-bg/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <Card key={index} className="bg-card hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <CardHeader className="text-center pb-4">
-                <div className="mx-auto w-12 h-12 rounded-lg bg-muted/20 flex items-center justify-center mb-4">
-                  <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                <div className="mx-auto w-12 h-12 rounded-lg bg-muted flex items-center justify-center mb-4">
+                  <feature.icon className="w-6 h-6 text-foreground" />
                 </div>
                 <CardTitle className="text-lg">{feature.title}</CardTitle>
               </CardHeader>
@@ -177,15 +173,15 @@ export const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-gradient-start to-gradient-end text-white py-20">
+      <section className="bg-foreground text-background py-20">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold mb-4">
             Ready to Take Control of Your Repositories?
           </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-background/70 mb-8 max-w-2xl mx-auto">
             Join teams who trust RepoPulse to manage their repository ecosystem efficiently and securely.
           </p>
-          <Button asChild size="lg" variant="secondary" className="text-lg px-8 bg-white text-gradient-start hover:bg-white/90 transition-colors">
+          <Button asChild size="lg" variant="secondary" className="text-lg px-8">
             <Link to="/repositories">
               Start Monitoring Now
               <ArrowRight className="ml-2 w-5 h-5" />
@@ -195,11 +191,11 @@ export const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-background/95 backdrop-blur py-12">
+      <footer className="border-t bg-background py-12">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="w-6 h-6 bg-gradient-to-br from-gradient-start to-gradient-end rounded"></div>
+              <div className="w-6 h-6 bg-foreground rounded"></div>
               <span className="font-semibold">RepoPulse</span>
             </div>
             <div className="text-sm text-muted-foreground">
