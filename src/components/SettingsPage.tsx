@@ -450,18 +450,20 @@ export const SettingsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-foreground">
+            Settings
+          </h1>
           <p className="text-muted-foreground mt-1">
             View and manage RepoPulse configuration
           </p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto space-y-2 sm:space-y-0">
           <Button
             variant="outline"
             onClick={copyToClipboard}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 w-full sm:w-auto"
           >
             <Copy className="w-4 h-4" />
             <span>Copy</span>
@@ -469,13 +471,13 @@ export const SettingsPage = () => {
           <Button
             variant="outline"
             onClick={() => downloadConfig()}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 w-full sm:w-auto"
           >
             <Download className="w-4 h-4" />
             <span>Download</span>
           </Button>
           <Button
-            className="flex items-center space-x-2 bg-primary hover:bg-primary/90"
+            className="flex items-center space-x-2 bg-primary hover:bg-primary/90 w-full sm:w-auto"
             onClick={() => {
               setEditConfig(config);
               setEditOpen(true);
@@ -694,15 +696,15 @@ export const SettingsPage = () => {
 
       <div className="grid gap-6">
         {/* Azure DevOps Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+        <Card className="w-full">
+          <CardHeader className="p-2 sm:p-4">
+            <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
               <span>Azure DevOps Configuration</span>
               <Badge variant="outline">Connected</Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+          <CardContent className="p-2 sm:p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
                   Organization
@@ -715,7 +717,7 @@ export const SettingsPage = () => {
                 <label className="text-sm font-medium text-muted-foreground">
                   Personal Access Token
                 </label>
-                <p className="text-foreground">
+                <p className="text-foreground text-wrap break-all">
                   {config.azureDevOps.personalAccessToken}
                 </p>
               </div>
@@ -724,15 +726,20 @@ export const SettingsPage = () => {
         </Card>
 
         {/* Repositories Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Repositories ({config.repositories.length})</CardTitle>
+        <Card className="w-full">
+          <CardHeader className="p-2 sm:p-4">
+            <CardTitle className="text-lg sm:text-xl">
+              Repositories ({config.repositories.length})
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-2 sm:p-4">
             <div className="space-y-4">
               {config.repositories.map((repo, index) => (
-                <div key={index} className="border rounded-lg p-4 bg-muted">
-                  <div className="grid grid-cols-3 gap-4">
+                <div
+                  key={index}
+                  className="border rounded-lg p-2 sm:p-4 bg-muted"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 gap-y-2">
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">
                         Name
@@ -779,9 +786,9 @@ export const SettingsPage = () => {
         </Card>
 
         {/* Renovate Configuration */}
-        <Card>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+        <Card className="w-full">
+          <CardContent className="p-2 sm:p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
                   Enabled
@@ -801,14 +808,18 @@ export const SettingsPage = () => {
         </Card>
 
         {/* Raw JSON Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Raw Configuration (config.json)</CardTitle>
+        <Card className="w-full">
+          <CardHeader className="p-2 sm:p-4">
+            <CardTitle className="text-lg sm:text-xl">
+              Raw Configuration (config.json)
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto border">
-              <code>{JSON.stringify(config, null, 2)}</code>
-            </pre>
+          <CardContent className="p-2 sm:p-4">
+            <div className="overflow-x-auto">
+              <pre className="bg-muted p-2 sm:p-4 rounded-lg text-xs sm:text-sm border min-w-[300px]">
+                <code>{JSON.stringify(config, null, 2)}</code>
+              </pre>
+            </div>
           </CardContent>
         </Card>
       </div>
