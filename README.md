@@ -1,73 +1,148 @@
-# Welcome to your Lovable project
+# RepoPulse
 
-## Project info
+RepoPulse is a modern dashboard for monitoring, managing, and triggering CI/CD pipelines and Renovate PRs across multiple repositories in Azure DevOps.  
+It provides a beautiful, unified UI for DevOps teams to track repository health, automate dependency updates, and manage build pipelines.
 
-**URL**: https://lovable.dev/projects/e00f948c-5602-4ac5-b649-4f532e019df8
+---
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+- **Repository Dashboard:**  
+  - View all configured repositories and their pipeline status.
+  - Trigger CI pipelines for individual repositories or all at once.
+  - Direct links to repository pages and build pipelines.
 
-**Use Lovable**
+- **Renovate PR Management:**  
+  - List and manage Renovate bot pull requests across all repositories.
+  - Publish (activate) draft PRs with a single click.
+  - See affected repositories for each PR, with direct links to PRs and build pipelines.
+  - Trigger builds for any repository directly from the PR card.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e00f948c-5602-4ac5-b649-4f532e019df8) and start prompting.
+- **Settings & Configuration:**  
+  - View and edit all configuration (Azure DevOps, repositories, Renovate) via a user-friendly form.
+  - Download or copy your config as JSON.
+  - Add/remove repositories and update pipeline settings without leaving the UI.
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Status Indicators:**  
+  - Visual status badges for build and PR states (success, failed, running, etc.).
+  - Tooltips and icons for quick status recognition.
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠️ Technologies Used
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Frontend:** React, TypeScript, Vite, shadcn-ui, Tailwind CSS
+- **Icons:** Lucide
+- **State & UI:** React hooks, custom toasts, and modals
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## ⚙️ Configuration
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+All configuration is managed via `public/config.json`.  
+**Example:**
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```json
+{
+  "azureDevOps": {
+    "baseUrl": "https://dev.azure.com",
+    "organization": "your-org",
+    "project": "your-project",
+    "personalAccessToken": "<YOUR_PERSONAL_ACCESS_TOKEN>"
+  },
+  "repositories": [
+    {
+      "name": "Repo1",
+      "url": "/your-org/your-project/_git/Repo1",
+      "pipelineId": "123",
+      "branch": "master",
+      "status": ""
+    }
+  ],
+  "renovate": {
+    "enabled": true,
+    "botName": "renovate[bot]",
+    "autoMerge": false
+  }
+}
 ```
 
-**Edit a file directly in GitHub**
+- **baseUrl:** Your Azure DevOps base URL (usually `https://dev.azure.com`)
+- **personalAccessToken:** Required for all API calls. **Never expose this in production frontend code!**
+- **repositories:** List of repos to manage, with their pipeline IDs and default branches.
+- **renovate:** Renovate bot settings.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## ⚠️ Security Note
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+> **Do NOT expose your Personal Access Token (PAT) in production frontend code.**  
+> Azure DevOps REST APIs do not support CORS, so all API calls requiring a PAT must be proxied through a secure backend.
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 🖥️ Local Development
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. **Clone the repository:**
+   ```sh
+   git clone <YOUR_GIT_URL>
+   cd <YOUR_PROJECT_NAME>
+   ```
 
-## How can I deploy this project?
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
 
-Simply open [Lovable](https://lovable.dev/projects/e00f948c-5602-4ac5-b649-4f532e019df8) and click on Share -> Publish.
+3. **Configure your Azure DevOps and repositories:**
+   - Edit `public/config.json` with your organization, project, PAT, and repositories.
 
-## Can I connect a custom domain to my Lovable project?
+4. **Start the development server:**
+   ```sh
+   npm run dev
+   ```
 
-Yes, you can!
+5. **Open [http://localhost:5173](http://localhost:5173) in your browser.**
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🧩 Main Pages
+
+- **Repositories:**  
+  Monitor and trigger CI pipelines for all configured repositories.
+
+- **Renovate:**  
+  Manage Renovate PRs, publish drafts, and trigger builds for affected repositories.
+
+- **Settings:**  
+  Edit, add, or remove repositories and Azure DevOps settings. Download or copy your config.
+
+---
+
+## 📝 Customization
+
+- **Add/Remove Repositories:**  
+  Use the Settings page to manage your repository list and pipeline settings.
+
+- **Change Azure DevOps Settings:**  
+  Update organization, project, or PAT in the Settings page.
+
+- **Edit Renovate Settings:**  
+  Enable/disable Renovate integration and set the bot name.
+
+---
+
+## 🛡️ Production Deployment
+
+- **You must use a backend to proxy Azure DevOps API calls.**  
+  This app is designed for internal/dev use or with a secure backend proxy.
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+If you have questions or need help, open an issue or contact the maintainer.
