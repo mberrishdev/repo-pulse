@@ -55,7 +55,6 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
   "azureDevOps": {
     "baseUrl": "https://dev.azure.com/your-org",
     "organization": "your-org",
-    "project": "your-project",
     "personalAccessToken": "<YOUR_PERSONAL_ACCESS_TOKEN>"
   },
   "repositories": [
@@ -63,7 +62,15 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
       "name": "Repo1",
       "url": "/your-org/your-project/_git/Repo1",
       "pipelineId": "123",
-      "branch": "main"
+      "branch": "main",
+      "project": "Project1"
+    },
+    {
+      "name": "Repo2",
+      "url": "/your-org/your-project/_git/Repo2",
+      "pipelineId": "456",
+      "branch": "develop",
+      "project": "Project2"
     }
   ],
   "renovate": {

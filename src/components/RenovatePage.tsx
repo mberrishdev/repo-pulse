@@ -72,7 +72,7 @@ export const RenovatePage = () => {
       try {
         const repoName = repo.name;
 
-        const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?api-version=6.0`;
+        const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${repo.project}/_apis/git/repositories/${repoName}/pullrequests?api-version=6.0`;
 
         const response = await fetch(apiUrl, {
           method: "GET",
@@ -117,7 +117,7 @@ export const RenovatePage = () => {
               lastMergeSourceCommit: {},
             };
           }
-          const buildUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/build/builds?branchName=refs/pull/${pr.pullRequestId}/merge&$top=1&api-version=7.1`;
+          const buildUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${repo.project}/_apis/build/builds?branchName=refs/pull/${pr.pullRequestId}/merge&$top=1&api-version=7.1`;
 
           const buildResponse = await fetch(buildUrl, {
             method: "GET",
@@ -145,7 +145,7 @@ export const RenovatePage = () => {
 
           const pullRequestRepository = {
             name: pr.repository.name,
-            prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`,
+            prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${repo.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`,
             branch: pr.sourceRefName,
             status: prStatus,
             buildStatus: buildStatus,
@@ -202,7 +202,9 @@ export const RenovatePage = () => {
     targetBranch: string
   ) => {
     if (!config) return;
-    const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?api-version=6.0`;
+    const repoConfig = config.repositories.find((r) => r.name === repoName);
+
+    const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${repoConfig.project}/_apis/git/repositories/${repoName}/pullrequests?api-version=6.0`;
     try {
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -222,7 +224,7 @@ export const RenovatePage = () => {
       if (!response.ok) throw new Error("Failed to create PR");
       const data = await response.json();
 
-      const prUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${repoName}/pullrequest/${data.pullRequestId}`;
+      const prUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${repoConfig.project}/_git/${repoName}/pullrequest/${data.pullRequestId}`;
 
       return prUrl;
     } catch (e) {
@@ -290,7 +292,11 @@ export const RenovatePage = () => {
                       (r) => r.name === repo.name
                     );
                     const pipelineUrl = repoConfig
-                      ? `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repoConfig.pipelineId}&branchName=${encodeURIComponent(repoConfig.branch)}`
+                      ? `${config.azureDevOps.baseUrl}/${
+                          config.azureDevOps.organization
+                        }/${repoConfig.project}/_build?definitionId=${
+                          repoConfig.pipelineId
+                        }&branchName=${encodeURIComponent(repoConfig.branch)}`
                       : null;
                     return (
                       <div

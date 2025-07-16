@@ -36,7 +36,7 @@ export const RepositoriesPage = () => {
     if (!config) return;
 
     for (const repo of config.repositories) {
-      const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/pipelines/${repo.pipelineId}/runs?api-version=6.0`;
+      const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${repo.project}/_apis/pipelines/${repo.pipelineId}/runs?api-version=6.0`;
 
       try {
         const response = await fetch(apiUrl, {
@@ -83,7 +83,7 @@ export const RepositoriesPage = () => {
     const repoConfig = config.repositories.find((r) => r.name === repoName);
     if (!repoConfig) return;
 
-    const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/pipelines/${repoConfig.pipelineId}/runs?api-version=7.1`;
+    const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${repoConfig.project}/_apis/pipelines/${repoConfig.pipelineId}/runs?api-version=7.1`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -201,7 +201,7 @@ export const RepositoriesPage = () => {
                         Pipeline ID: {repo.pipelineId}
                       </p>
                       <a
-                        href={`${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repo.pipelineId}`}
+                        href={`${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${repo.project}/_build?definitionId=${repo.pipelineId}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground"

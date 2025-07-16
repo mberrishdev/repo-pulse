@@ -2,21 +2,26 @@
   "azureDevOps": {
     "baseUrl": "https://your-azure-devops-url",
     "organization": "DefaultCollection",
-    "project": "Project",
     "personalAccessToken": "<YOUR_PERSONAL_ACCESS_TOKEN>"
   },
   "repositories": [
     {
-      "name": "<RepositoryName>",
-      "url": "/DefaultCollection/Project/_git/<RepositoryName>",
-      "pipelineId": "<PipelineId>",
-      "branch": "master",
-      "status": ""
+      "name": "RepoA",
+      "project": "ProjectA",
+      "url": "/DefaultCollection/ProjectA/_git/RepoA",
+      "pipelineId": "123",
+      "branch": "main"
+    },
+    {
+      "name": "RepoB",
+      "project": "ProjectB",
+      "url": "/DefaultCollection/ProjectB/_git/RepoB",
+      "pipelineId": "456",
+      "branch": "develop"
     }
   ],
   "renovate": {
     "enabled": true,
-    "botName": "renovate[bot]",
-    "autoMerge": false
+    "botName": "renovate[bot]"
   }
 }
