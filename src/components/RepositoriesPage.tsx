@@ -4,49 +4,31 @@ import { Card, CardContent } from "@/components/ui/card";
 import { StatusIndicator } from "@/components/StatusIndicator";
 import { ExternalLink, Play, RefreshCw, PlayCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-interface Repository {
-  name: string;
-  url: string;
-  pipelineId: string;
-  branch: string;
-  status: string;
-  buildUrl: string;
-}
-
-interface Config {
-  repositories: Repository[];
-  azureDevOps: {
-    project: unknown;
-    organization: unknown;
-    baseUrl: string;
-    personalAccessToken: string;
-  };
-}
+import { loadConfigFromLocalStorage } from "@/lib/configService";
+import { Config } from "./SettingsPage";
+import { useNavigate } from "react-router-dom";
 
 export const RepositoriesPage = () => {
+  const navigate = useNavigate();
   const [config, setConfig] = useState<Config | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [triggeringAll, setTriggeringAll] = useState(false);
 
   useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const response = await fetch("/config.json");
-        const configData: Config = await response.json();
-        setConfig(configData);
-      } catch (error) {
-        console.error("Failed to load config:", error);
-      }
-    };
-    loadConfig();
-  }, []);
+    const configData = loadConfigFromLocalStorage();
 
-  useEffect(() => {
-    if (config) {
+    if (!configData) {
+      navigate("/settings");
+      return;
+    }
+
+    setConfig(configData);
+
+    if (configData) {
       refreshStatuses();
     }
-  }, [config]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const refreshStatuses = async () => {
     setIsRefreshing(true);

@@ -1,11 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { StatusIndicator } from "@/components/StatusIndicator";
-import { GitPullRequest, Send, RefreshCw, ExternalLink, FileText } from "lucide-react";
+import { GitPullRequest, RefreshCw, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { loadConfigFromLocalStorage } from "@/lib/configService";
+import type { Config } from "@/components/SettingsPage";
+import { useNavigate } from "react-router-dom";
 
 interface PullRequest {
   id: string;
@@ -20,34 +21,13 @@ interface PullRequestRepository {
   name: string;
   branch: string;
   prUrl: string;
-  status: string
+  status: string;
   buildStatus: {
-    id: number,
-    status: string,
-    result: string,
-    url: string
-  } | null;
-}
-
-interface Config {
-  azureDevOps: {
-    organization: string;
-    project: string;
-    personalAccessToken: string;
-    baseUrl: string;
-  };
-  repositories: Array<{
-    name: string;
-    url: string;
-    pipelineId: string;
-    branch: string;
+    id: number;
     status: string;
-  }>;
-  renovate: {
-    enabled: boolean;
-    botName: string;
-    autoMerge: boolean;
-  };
+    result: string;
+    url: string;
+  } | null;
 }
 
 interface AzureDevOpsPR {
@@ -78,6 +58,7 @@ interface AzureDevOpsPR {
 }
 
 export const RenovatePage = () => {
+  const navigate = useNavigate();
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [config, setConfig] = useState<Config | null>(null);
@@ -94,10 +75,12 @@ export const RenovatePage = () => {
         const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?api-version=6.0`;
 
         const response = await fetch(apiUrl, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
-            'Content-Type': 'application/json',
+            Authorization: `Basic ${btoa(
+              ":" + config.azureDevOps.personalAccessToken
+            )}`,
+            "Content-Type": "application/json",
           },
         });
 
@@ -108,10 +91,17 @@ export const RenovatePage = () => {
         const data = await response.json();
         const pullRequests: AzureDevOpsPR[] = data.value || [];
 
-        const renovatePRs = pullRequests.filter(pr =>
-          pr.createdBy.displayName.toLowerCase().includes(config.renovate.botName.toLowerCase()) ||
-          pr.createdBy.uniqueName.toLowerCase().includes(config.renovate.botName.toLowerCase()) ||
-          pr.createdBy.id.toLowerCase().includes(config.renovate.botName.toLowerCase())
+        const renovatePRs = pullRequests.filter(
+          (pr) =>
+            pr.createdBy.displayName
+              .toLowerCase()
+              .includes(config.renovate.botName.toLowerCase()) ||
+            pr.createdBy.uniqueName
+              .toLowerCase()
+              .includes(config.renovate.botName.toLowerCase()) ||
+            pr.createdBy.id
+              .toLowerCase()
+              .includes(config.renovate.botName.toLowerCase())
         );
 
         // Group by title
@@ -130,11 +120,13 @@ export const RenovatePage = () => {
           const buildUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/build/builds?branchName=refs/pull/${pr.pullRequestId}/merge&$top=1&api-version=7.1`;
 
           const buildResponse = await fetch(buildUrl, {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
-              'Content-Type': 'application/json',
-            }
+              Authorization: `Basic ${btoa(
+                ":" + config.azureDevOps.personalAccessToken
+              )}`,
+              "Content-Type": "application/json",
+            },
           });
 
           let buildStatus = null;
@@ -146,22 +138,22 @@ export const RenovatePage = () => {
                 id: latestBuild.id,
                 status: latestBuild.status,
                 result: latestBuild.result,
-                url: latestBuild._links.web.href
+                url: latestBuild._links.web.href,
               };
             }
           }
-
 
           const pullRequestRepository = {
             name: pr.repository.name,
             prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`,
             branch: pr.sourceRefName,
             status: prStatus,
-            buildStatus: buildStatus
-          }
+            buildStatus: buildStatus,
+          };
           groupedPRs[pr.title].repositories.push(pullRequestRepository);
-          groupedPRs[pr.title].lastMergeSourceCommit[pr.repository.name] = pr.lastMergeSourceCommit?.commitId || "";
-        };
+          groupedPRs[pr.title].lastMergeSourceCommit[pr.repository.name] =
+            pr.lastMergeSourceCommit?.commitId || "";
+        }
       } catch (error) {
         console.error(`Failed to fetch PRs for ${repo.name}:`, error);
       }
@@ -171,22 +163,19 @@ export const RenovatePage = () => {
   };
 
   useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const response = await fetch('/config.json');
-        const configData: Config = await response.json();
-        setConfig(configData);
+    const configData = loadConfigFromLocalStorage();
 
-        if (configData.renovate.enabled) {
-          const renovatePRs = await fetchRenovatePRs(configData);
-          setPullRequests(renovatePRs);
-        }
-      } catch (error) {
-        console.error('Failed to load config:', error);
-      }
-    };
+    if (!configData) {
+      navigate("/settings");
+      return;
+    }
+    setConfig(configData);
 
-    loadConfig();
+    if (configData.renovate.enabled) {
+      fetchRenovatePRs(configData).then((renovatePRs) => {
+        setPullRequests(renovatePRs);
+      });
+    }
   }, []);
 
   const refreshPRs = async () => {
@@ -207,32 +196,41 @@ export const RenovatePage = () => {
     }
   };
 
-  const createUpdatePRFromMainBrench = async (repoName: string, sourceBranch: string, targetBranch: string) => {
+  const createUpdatePRFromMainBrench = async (
+    repoName: string,
+    sourceBranch: string,
+    targetBranch: string
+  ) => {
     if (!config) return;
     const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?api-version=6.0`;
     try {
-
       const response = await fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
-          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(
+            ":" + config.azureDevOps.personalAccessToken
+          )}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           sourceRefName: `refs/heads/${sourceBranch}`,
           targetRefName: `${targetBranch}`,
           title: `Update ${targetBranch} from ${sourceBranch}`,
-          description: `Automated PR to update ${targetBranch} with latest changes from ${sourceBranch}`
+          description: `Automated PR to update ${targetBranch} with latest changes from ${sourceBranch}`,
         }),
       });
-      if (!response.ok) throw new Error('Failed to create PR');
+      if (!response.ok) throw new Error("Failed to create PR");
       const data = await response.json();
 
       const prUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${repoName}/pullrequest/${data.pullRequestId}`;
 
       return prUrl;
     } catch (e) {
-      toast({ title: "Error", description: "Failed to create update PR", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to create update PR",
+        variant: "destructive",
+      });
       return null;
     }
   };
@@ -241,7 +239,9 @@ export const RenovatePage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{pullRequests.length} Renovate PRs</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {pullRequests.length} Renovate PRs
+          </h1>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -250,7 +250,9 @@ export const RenovatePage = () => {
             disabled={isRefreshing}
             className="flex items-center space-x-2"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             <span>Refresh PRs</span>
           </Button>
         </div>
@@ -274,28 +276,46 @@ export const RenovatePage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-
-                </div>
+                <div className="flex items-center space-x-3"></div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Affected Repositories:</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Affected Repositories:
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {pr.repositories.map((repo) => {
-                    const repoConfig = config?.repositories.find(r => r.name === repo.name);
+                    const repoConfig = config?.repositories.find(
+                      (r) => r.name === repo.name
+                    );
                     const pipelineUrl = repoConfig
-                      ? `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repoConfig.pipelineId}&branchName=${encodeURIComponent(repoConfig.branch)}`
+                      ? `${config.azureDevOps.baseUrl}/${
+                          config.azureDevOps.organization
+                        }/${config.azureDevOps.project}/_build?definitionId=${
+                          repoConfig.pipelineId
+                        }&branchName=${encodeURIComponent(repoConfig.branch)}`
                       : null;
                     return (
-                      <div key={repo.name} className="flex items-center gap-2 p-2 border rounded-md">
+                      <div
+                        key={repo.name}
+                        className="flex items-center gap-2 p-2 border rounded-md"
+                      >
                         <div className="flex items-center gap-1">
-                          <Badge variant={pr.status === "draft" ? "secondary" : "default"}>
+                          <Badge
+                            variant={
+                              pr.status === "draft" ? "secondary" : "default"
+                            }
+                          >
                             {repo.status}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
-                            <a href={repo.prUrl} target="_blank" rel="noopener noreferrer" className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1">
+                            <a
+                              href={repo.prUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1"
+                            >
                               {repo.name}
                               <ExternalLink className="w-4 h-4 text-blue-600" />
                             </a>
@@ -303,15 +323,17 @@ export const RenovatePage = () => {
 
                           {repo.buildStatus && (
                             <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <Badge
-                                variant="outline"
-                              >
-                                <a href={repo.buildStatus.url} target="_blank" rel="noopener noreferrer" className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1">
+                              <Badge variant="outline">
+                                <a
+                                  href={repo.buildStatus.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1"
+                                >
                                   Build {repo.buildStatus.result}
                                   <ExternalLink className="w-4 h-4 text-blue-600" />
                                 </a>
                               </Badge>
-
                             </div>
                           )}
 
@@ -320,16 +342,19 @@ export const RenovatePage = () => {
                             variant="outline"
                             className="ml-2"
                             onClick={async () => {
-                              const prUrl = await createUpdatePRFromMainBrench(repo.name, repoConfig.branch, repo.branch);
+                              const prUrl = await createUpdatePRFromMainBrench(
+                                repo.name,
+                                repoConfig.branch,
+                                repo.branch
+                              );
                               if (prUrl) {
-                                window.open(prUrl, '_blank');
+                                window.open(prUrl, "_blank");
                               }
                             }}
                           >
                             Update from master
                           </Button>
                         </div>
-
                       </div>
                     );
                   })}

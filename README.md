@@ -39,13 +39,21 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
 
 ## ⚙️ Configuration
 
-All configuration is managed via `public/config.json`.  
-**Example:**
+- **Configuration is now stored securely in your browser's localStorage.**
+- **You must import a config.json file or create one manually via the Settings page.**
+- Your configuration is private and never leaves your browser unless you explicitly download or share it.
+
+**How to get started:**
+1. On first launch, you will be prompted to import a `config.json` or create one manually.
+2. You can always download, edit, or re-import your config from the Settings page.
+3. The config is only accessible to you and is not exposed to the public or to the server.
+
+**Example config:**
 
 ```json
 {
   "azureDevOps": {
-    "baseUrl": "https://dev.azure.com",
+    "baseUrl": "https://dev.azure.com/your-org",
     "organization": "your-org",
     "project": "your-project",
     "personalAccessToken": "<YOUR_PERSONAL_ACCESS_TOKEN>"
@@ -55,19 +63,16 @@ All configuration is managed via `public/config.json`.
       "name": "Repo1",
       "url": "/your-org/your-project/_git/Repo1",
       "pipelineId": "123",
-      "branch": "master",
-      "status": ""
+      "branch": "main"
     }
   ],
   "renovate": {
-    "enabled": true,
-    "botName": "renovate[bot]",
-    "autoMerge": false
+    "botName": "renovate[bot]"
   }
 }
 ```
 
-- **baseUrl:** Your Azure DevOps base URL (usually `https://dev.azure.com`)
+- **baseUrl:** Your Azure DevOps base URL (usually `https://dev.azure.com/your-org`)
 - **personalAccessToken:** Required for all API calls. **Never expose this in production frontend code!**
 - **repositories:** List of repos to manage, with their pipeline IDs and default branches.
 - **renovate:** Renovate bot settings.
