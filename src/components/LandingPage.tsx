@@ -15,8 +15,8 @@ import {
   Shield,
   Zap,
   BarChart3,
-  Github,
   Activity,
+  Github,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
@@ -63,7 +63,7 @@ export const LandingPage = () => {
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-foreground rounded-lg flex items-center justify-center">
-              <GitBranch className="w-5 h-5 text-background" />
+              <Activity className="w-5 h-5 text-background" />
             </div>
             <h1 className="text-xl font-bold">RepoPulse</h1>
           </div>

@@ -34,7 +34,7 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar>
+    <Sidebar className="">
       <SidebarHeader className="p-4">
         <h2 className="text-xl font-bold text-gray-900">RepoPulse</h2>
       </SidebarHeader>
