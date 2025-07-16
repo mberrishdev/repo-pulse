@@ -58,32 +58,48 @@ export const RepositoriesPage = () => {
     });
   };
 
-  const triggerAllPipelines = async () => {
-    setTriggeringAll(true);
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    setConfig(prev => prev ? {
-      ...prev,
-      repositories: prev.repositories.map(repo => ({ ...repo, status: "running" }))
-    } : prev);
-    setTriggeringAll(false);
-    toast({
-      title: "Pipelines Triggered",
-      description: "All CI pipelines have been triggered successfully.",
-    });
+  const triggerSinglePipeline = async (repoName: string) => {
+    if (!config) return;
+    const repoConfig = config.repositories.find(r => r.name === repoName);
+    if (!repoConfig) return;
+    const apiUrl = `${config.azureDevOps.baseUrl}/${repoConfig.name}/_apis/build/builds?api-version=6.0`;
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          definition: { id: repoConfig.pipelineId },
+          sourceBranch: `refs/heads/${repoConfig.branch}`,
+        }),
+      });
+      if (!response.ok) {
+        toast({
+          title: 'Pipeline Trigger Failed',
+          description: `Failed to trigger pipeline for ${repoName}.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+      toast({
+        title: 'Pipeline Triggered',
+        description: `Pipeline triggered for ${repoName} on branch ${repoConfig.branch}.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Pipeline Trigger Failed',
+        description: `Failed to trigger pipeline for ${repoName}.`,
+        variant: 'destructive',
+      });
+    }
   };
 
-  const triggerSinglePipeline = async (repoName: string) => {
-    setConfig(prev => prev ? {
-      ...prev,
-      repositories: prev.repositories.map(repo =>
-        repo.name === repoName ? { ...repo, status: "running" } : repo
-      )
-    } : prev);
-    toast({
-      title: "Pipeline Triggered",
-      description: `CI pipeline for ${repoName} has been triggered.`,
-    });
+  const triggerAllPipelines = async () => {
+    if (!config) return;
+    for (const repo of config.repositories) {
+      await triggerSinglePipeline(repo.name);
+    }
   };
 
   if (!config) return <div>Loading...</div>;

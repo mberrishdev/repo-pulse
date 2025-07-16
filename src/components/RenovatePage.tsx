@@ -63,11 +63,18 @@ interface AzureDevOpsPR {
   }>;
 }
 
+interface RepoBuildStatus {
+  [repoName: string]: {
+    status: "succeeded" | "failed" | "inProgress" | "cancelling" | "canceled" | "partiallySucceeded" | "notStarted" | "unknown";
+    buildUrl?: string;
+  };
+}
 
 export const RenovatePage = () => {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [config, setConfig] = useState<Config | null>(null);
+  const [buildStatuses, setBuildStatuses] = useState<Record<string, RepoBuildStatus>>({}); // pr.id -> repoName -> status
 
   const fetchRenovatePRs = async (config: Config) => {
     if (!config.renovate.enabled) return [];
@@ -155,6 +162,70 @@ export const RenovatePage = () => {
     
     loadConfig();
   }, []);
+
+  // Fetch build status for each PR/repo after PRs are loaded
+  useEffect(() => {
+    const fetchBuildStatuses = async () => {
+      if (!config) return;
+      const statuses: Record<string, RepoBuildStatus> = {};
+      for (const pr of pullRequests) {
+        statuses[pr.id] = {};
+        for (const repoName of pr.repositories) {
+          const repoConfig = config.repositories.find(r => r.name === repoName);
+          if (!repoConfig) continue;
+          const branchNames = [
+            `refs/pull/${pr.id}/merge`,
+            `refs/pull/${pr.id}/head`,
+            `refs/heads/${repoConfig.branch}`
+          ];
+          let build = null;
+          for (const branchName of branchNames) {
+            const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/build/builds?definitions=${repoConfig.pipelineId}&branchName=${encodeURIComponent(branchName)}&reason=pullRequest&$top=1&api-version=6.0`;
+            try {
+              const response = await fetch(apiUrl, {
+                headers: {
+                  'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              if (!response.ok) throw new Error('Failed to fetch build status');
+              const data = await response.json();
+              console.log(data);
+              if (data.value && data.value.length > 0) {
+                build = data.value[0];
+                break;
+              }
+            } catch (e) {
+              console.error(`Failed to fetch build status for ${repoName} on branch ${branchName}:`, e);
+            }
+          }
+          let status: RepoBuildStatus[string]["status"] = "unknown";
+          let buildUrl: string | undefined = undefined;
+          if (build) {
+            switch (build.result) {
+              case "succeeded": status = "succeeded"; break;
+              case "failed": status = "failed"; break;
+              case "canceled": status = "canceled"; break;
+              case "partiallySucceeded": status = "partiallySucceeded"; break;
+              default:
+                switch (build.status) {
+                  case "inProgress": status = "inProgress"; break;
+                  case "cancelling": status = "cancelling"; break;
+                  case "notStarted": status = "notStarted"; break;
+                  default: status = "unknown";
+                }
+            }
+            buildUrl = build._links?.web?.href || build.url;
+          }
+          statuses[pr.id][repoName] = { status, buildUrl };
+        }
+      }
+      setBuildStatuses(statuses);
+    };
+    if (pullRequests.length && config) {
+      fetchBuildStatuses();
+    }
+  }, [pullRequests, config]);
 
   const refreshPRs = async () => {
     if (!config) return;
@@ -276,6 +347,44 @@ export const RenovatePage = () => {
     refreshPRs();
   };
 
+  const triggerBuild = async (repoName: string) => {
+    if (!config) return;
+    const repoConfig = config.repositories.find(r => r.name === repoName);
+    if (!repoConfig) return;
+    const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/build/builds?api-version=6.0`;
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          definition: { id: repoConfig.pipelineId },
+          sourceBranch: `refs/heads/${repoConfig.branch}`,
+        }),
+      });
+      if (!response.ok) {
+        toast({
+          title: 'Build Trigger Failed',
+          description: `Failed to trigger build for ${repoName}.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+      toast({
+        title: 'Build Triggered',
+        description: `Build triggered for ${repoName} on branch ${repoConfig.branch}.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Build Trigger Failed',
+        description: `Failed to trigger build for ${repoName}.`,
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -343,17 +452,40 @@ export const RenovatePage = () => {
                 <p className="text-sm font-medium text-gray-700 mb-2">Affected Repositories:</p>
                 <div className="flex flex-wrap gap-2">
                   {pr.repositories.map((repo) => {
-                    // Find repo config
                     const repoConfig = config?.repositories.find(r => r.name === repo);
                     const pipelineUrl = repoConfig
                       ? `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repoConfig.pipelineId}&branchName=${encodeURIComponent(repoConfig.branch)}`
                       : null;
+                    const buildStatus = buildStatuses[pr.id]?.[repo]?.status || "unknown";
+                    const buildUrl = buildStatuses[pr.id]?.[repo]?.buildUrl;
                     return (
                       <span key={repo} className="flex items-center gap-1">
                         <Badge variant="outline" className="text-xs">
                           {repo}
                         </Badge>
-                        {pipelineUrl && (
+                        {buildStatus !== "unknown" && (
+                          <span title={`Build status: ${buildStatus}`}>{
+                            buildStatus === "succeeded" ? "✅" :
+                            buildStatus === "failed" ? "❌" :
+                            buildStatus === "inProgress" ? "⏳" :
+                            buildStatus === "canceled" ? "🚫" :
+                            buildStatus === "partiallySucceeded" ? "⚠️" :
+                            buildStatus === "notStarted" ? "🕒" :
+                            "❔"
+                          }</span>
+                        )}
+                        {buildUrl && (
+                          <a
+                            href={buildUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-0.5 rounded hover:bg-gray-200"
+                            title="View Latest Build"
+                          >
+                            <ExternalLink className="w-4 h-4 text-blue-600" />
+                          </a>
+                        )}
+                        {pipelineUrl && !buildUrl && (
                           <a
                             href={pipelineUrl}
                             target="_blank"
@@ -364,6 +496,15 @@ export const RenovatePage = () => {
                             <ExternalLink className="w-4 h-4 text-blue-600" />
                           </a>
                         )}
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="ml-1"
+                          title="Trigger Build"
+                          onClick={() => triggerBuild(repo)}
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                        </Button>
                       </span>
                     );
                   })}
