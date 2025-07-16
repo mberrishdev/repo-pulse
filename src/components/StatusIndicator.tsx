@@ -41,13 +41,23 @@ export const StatusIndicator = ({ status, showLabel = false, size = "md" }: Stat
           badgeVariant: "default" as const,
           badgeClass: "bg-blue-100 text-blue-800 border-blue-200"
         };
+      case "canceled":
+        return {
+          icon: XCircle, 
+          color: "text-gray-600",
+          bgColor: "bg-gray-50",
+          borderColor: "border-gray-200",
+          label: "canceled",
+          badgeVariant: "default" as const,
+          badgeClass: "bg-gray-100 text-gray-800 border-gray-200"
+        };
       default:
         return {
           icon: HelpCircle,
           color: "text-gray-600",
           bgColor: "bg-gray-50",
           borderColor: "border-gray-200", 
-          label: "Unknown",
+          label: status,
           badgeVariant: "secondary" as const,
           badgeClass: "bg-gray-100 text-gray-800 border-gray-200"
         };

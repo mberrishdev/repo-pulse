@@ -29,7 +29,7 @@ export const RepositoriesPage = () => {
   const [config, setConfig] = useState<Config | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [triggeringAll, setTriggeringAll] = useState(false);
-
+  
   useEffect(() => {
     const loadConfig = async () => {
       try {
@@ -83,8 +83,9 @@ export const RepositoriesPage = () => {
           repo.status = data.value[0].state;
         }
 
-        console.log("data", data.value[0].restul, data.value[0].state);
         repo.buildUrl = data.value[0]._links['pipeline.web'].href;
+
+        localStorage.setItem(`${repo.name}-buildTime`, data.value[0].createdDate);
 
       } catch (error) {
         console.error(`Failed to trigger pipeline for ${repo.name}:`, error);
@@ -92,10 +93,6 @@ export const RepositoriesPage = () => {
     }
 
     setIsRefreshing(false);
-    toast({
-      title: "Status Updated",
-      description: "Pipeline statuses have been refreshed.",
-    });
   };
 
   const triggerSinglePipeline = async (repoName: string, triggerAll: boolean) => {
@@ -135,8 +132,6 @@ export const RepositoriesPage = () => {
         return;
       }
   
-      const result = await response.json();
-
       if(!triggerAll) await refreshStatuses();
   
     } catch (error) {
@@ -237,6 +232,13 @@ export const RepositoriesPage = () => {
                     <Play className="w-3 h-3" />
                     <span>Trigger CI</span>
                   </Button>
+
+                  <span className="text-xs text-gray-500">
+                    Build Time: {localStorage.getItem(`${repo.name}-buildTime`) 
+                      ? new Date(localStorage.getItem(`${repo.name}-buildTime`)).toLocaleString()
+                      : 'Never'}
+                  </span>
+
                 </div>
               </div>
             </CardContent>
