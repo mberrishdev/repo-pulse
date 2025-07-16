@@ -138,7 +138,7 @@ All configuration is managed via `public/config.json`.
   This app is designed for internal/dev use or with a secure backend proxy.
 
 ---
-
+ 
 ## 📄 License
 
 MIT
@@ -146,3 +146,22 @@ MIT
 ---
 
 If you have questions or need help, open an issue or contact the maintainer.
+
+---
+
+## 🐳 Docker Usage
+
+You can build and run RepoPulse as a Docker container:
+
+1. **Build the Docker image:**
+   ```sh
+   docker build -t repopulse .
+   ```
+
+2. **Run the container:**
+   ```sh
+   docker run -p 5050:80 -d repopulse
+   ```
+   The app will be available at [http://localhost:5050](http://localhost:5050).
+
+---
