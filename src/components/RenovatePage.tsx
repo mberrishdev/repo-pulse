@@ -152,7 +152,6 @@ export const RenovatePage = () => {
           }
 
 
-          console.log(buildStatus);
           const pullRequestRepository = {
             name: pr.repository.name,
             prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`,
