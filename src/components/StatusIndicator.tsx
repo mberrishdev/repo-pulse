@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock, HelpCircle } from "lucide-react";
 
 interface StatusIndicatorProps {
-  status: "success" | "failed" | "running" | "unknown";
+  status: string;
   showLabel?: boolean;
   size?: "sm" | "md" | "lg";
 }
@@ -11,7 +11,7 @@ interface StatusIndicatorProps {
 export const StatusIndicator = ({ status, showLabel = false, size = "md" }: StatusIndicatorProps) => {
   const getStatusConfig = () => {
     switch (status) {
-      case "success":
+      case "succeeded":
         return {
           icon: CheckCircle,
           color: "text-green-600",
@@ -31,13 +31,13 @@ export const StatusIndicator = ({ status, showLabel = false, size = "md" }: Stat
           badgeVariant: "destructive" as const,
           badgeClass: "bg-red-100 text-red-800 border-red-200"
         };
-      case "running":
+      case "inProgress":
         return {
           icon: Clock,
           color: "text-blue-600",
           bgColor: "bg-blue-50", 
           borderColor: "border-blue-200",
-          label: "Running",
+          label: "inProgress",
           badgeVariant: "default" as const,
           badgeClass: "bg-blue-100 text-blue-800 border-blue-200"
         };

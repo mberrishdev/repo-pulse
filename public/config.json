@@ -1,24 +1,17 @@
 {
   "azureDevOps": {
-    "baseUrl": "https://dev.azure.com",
-    "organization": "easydine",
-    "project": "easydine",
-    "personalAccessToken": "7p4qUoHuaJ5rz8HWR6CWiepyE3y0naclTjvLIN5PeHV17QHAce7QJQQJ99BGACAAAAAAAAAAAAASAZDO1wrm"
+    "baseUrl": "https://your-azure-devops-url",
+    "organization": "DefaultCollection",
+    "project": "Project",
+    "personalAccessToken": "<YOUR_PERSONAL_ACCESS_TOKEN>"
   },
   "repositories": [
     {
-      "name": "EasyDine",
-      "url": "/easydine/_git/EasyDine",
-      "pipelineId": "123",
+      "name": "<RepositoryName>",
+      "url": "/DefaultCollection/Project/_git/<RepositoryName>",
+      "pipelineId": "<PipelineId>",
       "branch": "master",
-      "status": "success"
-    },
-    {
-      "name": "EasyDine.Front",
-      "url": "/easydine/_git/EasyDine.Front",
-      "pipelineId": "123",
-      "branch": "master",
-      "status": "success"
+      "status": ""
     }
   ],
   "renovate": {
