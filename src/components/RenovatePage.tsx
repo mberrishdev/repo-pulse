@@ -20,6 +20,7 @@ interface PullRequestRepository {
   name: string;
   branch: string;
   prUrl: string;
+  status: string
 }
 
 interface Config {
@@ -110,6 +111,7 @@ export const RenovatePage = () => {
         // Group by title
         renovatePRs.forEach(pr => {
           const prStatus = pr.isDraft ? "draft" : "active";
+          console.log(pr.title, pr.isDraft)
           if (!groupedPRs[pr.title]) {
             groupedPRs[pr.title] = {
               id: pr.pullRequestId.toString(),
@@ -123,7 +125,8 @@ export const RenovatePage = () => {
           const pullRequestRepository = {
             name: pr.repository.name,
             prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`,
-            branch: pr.sourceRefName
+            branch: pr.sourceRefName,
+            status: prStatus
           }
           groupedPRs[pr.title].repositories.push(pullRequestRepository);
           groupedPRs[pr.title].lastMergeSourceCommit[pr.repository.name] = pr.lastMergeSourceCommit?.commitId || "";
@@ -207,8 +210,7 @@ export const RenovatePage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Renovate PRs</h1>
-          <p className="text-gray-600 mt-1">Manage Renovate dependency update pull requests</p>
+          <h1 className="text-2xl font-bold text-gray-900">{pullRequests.length} Renovate PRs</h1>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -235,9 +237,6 @@ export const RenovatePage = () => {
                       {pr.title}
                     </CardTitle>
                     <div className="flex items-center space-x-2 mt-2">
-                      <Badge variant={pr.status === "draft" ? "secondary" : "default"}>
-                        {pr.status}
-                      </Badge>
                       <span className="text-sm text-gray-500">
                         {pr.repositories.length} repositories
                       </span>
@@ -261,6 +260,9 @@ export const RenovatePage = () => {
                     return (
                       <div key={repo.name} className="flex items-center gap-2 p-2 border rounded-md">
                         <div className="flex items-center gap-1">
+                          <Badge variant={pr.status === "draft" ? "secondary" : "default"}>
+                            {repo.status}
+                          </Badge>
                           <Badge variant="outline" className="text-xs">
                             <a href={repo.prUrl} target="_blank" rel="noopener noreferrer" className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1">
                               {repo.name}
