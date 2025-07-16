@@ -180,6 +180,38 @@ export const RenovatePage = () => {
     }
   };
 
+  const createUpdatePR = async (repoName: string, targetBranch: string) => {
+    if (!config) return;
+    const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullrequests?api-version=6.0`;
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sourceRefName: "refs/heads/master",
+          targetRefName: `refs/heads/${targetBranch}`,
+          title: `Update ${targetBranch} from master`,
+          description: `Automated PR to update ${targetBranch} with latest changes from master`
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to create PR');
+      const data = await response.json();
+      toast({
+        title: "Update PR Created",
+        description: (
+          <span>
+            <a href={`${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${repoName}/pullrequest/${data.pullRequestId}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">View PR</a>
+          </span>
+        ),
+      });
+    } catch (e) {
+      toast({ title: "Error", description: "Failed to create update PR", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -244,6 +276,14 @@ export const RenovatePage = () => {
                               <ExternalLink className="w-4 h-4 text-blue-600" />
                             </a>
                           </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="ml-2"
+                            onClick={() => createUpdatePR(repo.name, repoConfig?.branch || 'master')}
+                          >
+                            Update from master
+                          </Button>
                           {/* {pipelineUrl && (
                             <a
                               href={pipelineUrl}
