@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,8 +17,8 @@ interface Repository {
 interface Config {
   repositories: Repository[];
   azureDevOps: {
-    project: any;
-    organization: any;
+    project: unknown;
+    organization: unknown;
     baseUrl: string;
     personalAccessToken: string;
   };
@@ -29,19 +28,18 @@ export const RepositoriesPage = () => {
   const [config, setConfig] = useState<Config | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [triggeringAll, setTriggeringAll] = useState(false);
-  
+
   useEffect(() => {
     const loadConfig = async () => {
       try {
-        const response = await fetch('/config.json');
+        const response = await fetch("/config.json");
         const configData: Config = await response.json();
         setConfig(configData);
       } catch (error) {
-        console.error('Failed to load config:', error);
+        console.error("Failed to load config:", error);
       }
     };
     loadConfig();
-
   }, []);
 
   useEffect(() => {
@@ -56,15 +54,16 @@ export const RepositoriesPage = () => {
     if (!config) return;
 
     for (const repo of config.repositories) {
-
       const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/pipelines/${repo.pipelineId}/runs?api-version=6.0`;
 
       try {
         const response = await fetch(apiUrl, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+            "Content-Type": "application/json",
+            Authorization: `Basic ${btoa(
+              ":" + config.azureDevOps.personalAccessToken
+            )}`,
           },
         });
         if (!response.ok) {
@@ -73,20 +72,18 @@ export const RepositoriesPage = () => {
 
         const data = await response.json();
 
-        if(data.value[0].result)
-        {
-
+        if (data.value[0].result) {
           repo.status = data.value[0].result;
-        }
-        else
-        {
+        } else {
           repo.status = data.value[0].state;
         }
 
-        repo.buildUrl = data.value[0]._links['pipeline.web'].href;
+        repo.buildUrl = data.value[0]._links["pipeline.web"].href;
 
-        localStorage.setItem(`${repo.name}-buildTime`, data.value[0].createdDate);
-
+        localStorage.setItem(
+          `${repo.name}-buildTime`,
+          data.value[0].createdDate
+        );
       } catch (error) {
         console.error(`Failed to trigger pipeline for ${repo.name}:`, error);
       }
@@ -95,56 +92,57 @@ export const RepositoriesPage = () => {
     setIsRefreshing(false);
   };
 
-  const triggerSinglePipeline = async (repoName: string, triggerAll: boolean) => {
+  const triggerSinglePipeline = async (
+    repoName: string,
+    triggerAll: boolean
+  ) => {
     if (!config) return;
-  
-    const repoConfig = config.repositories.find(r => r.name === repoName);
+
+    const repoConfig = config.repositories.find((r) => r.name === repoName);
     if (!repoConfig) return;
-  
+
     const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/pipelines/${repoConfig.pipelineId}/runs?api-version=7.1`;
-  
+
     try {
       const response = await fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
+          "Content-Type": "application/json",
+          Authorization: `Basic ${btoa(
+            ":" + config.azureDevOps.personalAccessToken
+          )}`,
         },
         body: JSON.stringify({
           resources: {
             repositories: {
               self: {
-                refName: `refs/heads/${repoConfig.branch}`
-              }
-            }
+                refName: `refs/heads/${repoConfig.branch}`,
+              },
+            },
           },
           templateParameters: {},
-          variables: {}
+          variables: {},
         }),
       });
-  
+
       if (!response.ok) {
         toast({
-          title: 'Pipeline Trigger Failed',
+          title: "Pipeline Trigger Failed",
           description: `Failed to trigger pipeline for ${repoName}. Status: ${response.status}`,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return;
       }
-  
-      if(!triggerAll) await refreshStatuses();
-  
+
+      if (!triggerAll) await refreshStatuses();
     } catch (error) {
       toast({
-        title: 'Pipeline Trigger Failed',
+        title: "Pipeline Trigger Failed",
         description: `Failed to trigger pipeline for ${repoName}. Error: ${error}`,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
-
   };
-  
-
 
   const triggerAllPipelines = async () => {
     if (!config) return;
@@ -163,7 +161,9 @@ export const RepositoriesPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Repositories</h1>
-          <p className="text-gray-600 mt-1">Monitor and manage CI pipelines for all repositories</p>
+          <p className="text-gray-600 mt-1">
+            Monitor and manage CI pipelines for all repositories
+          </p>
         </div>
         <div className="flex space-x-3">
           <Button
@@ -172,7 +172,9 @@ export const RepositoriesPage = () => {
             disabled={isRefreshing}
             className="flex items-center space-x-2"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             <span>Refresh Status</span>
           </Button>
           <Button
@@ -181,7 +183,9 @@ export const RepositoriesPage = () => {
             className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
           >
             <PlayCircle className="w-4 h-4" />
-            <span>{triggeringAll ? 'Triggering...' : 'Trigger All CI Pipelines'}</span>
+            <span>
+              {triggeringAll ? "Triggering..." : "Trigger All CI Pipelines"}
+            </span>
           </Button>
         </div>
       </div>
@@ -194,9 +198,15 @@ export const RepositoriesPage = () => {
                 <div className="flex items-center space-x-4">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold text-lg text-gray-900">{repo.name}</h3>
+                      <h3 className="font-semibold text-lg text-gray-900">
+                        {repo.name}
+                      </h3>
                       <a
-                        href={repo.url.startsWith('http') ? repo.url : `${config.azureDevOps.baseUrl}${repo.url}`}
+                        href={
+                          repo.url.startsWith("http")
+                            ? repo.url
+                            : `${config.azureDevOps.baseUrl}${repo.url}`
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-600"
@@ -205,21 +215,27 @@ export const RepositoriesPage = () => {
                       </a>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <p className="text-sm text-gray-500">Pipeline ID: {repo.pipelineId}</p>
+                      <p className="text-sm text-gray-500">
+                        Pipeline ID: {repo.pipelineId}
+                      </p>
                       <a
-                          href={`${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repo.pipelineId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          <ExternalLink className="w-4 h-4" />
+                        href={`${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repo.pipelineId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <ExternalLink className="w-4 h-4" />
                       </a>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <a href={repo.buildUrl} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={repo.buildUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <StatusIndicator status={repo.status} showLabel />
                   </a>
 
@@ -234,11 +250,13 @@ export const RepositoriesPage = () => {
                   </Button>
 
                   <span className="text-xs text-gray-500">
-                    Build Time: {localStorage.getItem(`${repo.name}-buildTime`) 
-                      ? new Date(localStorage.getItem(`${repo.name}-buildTime`)).toLocaleString()
-                      : 'Never'}
+                    Build Time:{" "}
+                    {localStorage.getItem(`${repo.name}-buildTime`)
+                      ? new Date(
+                          localStorage.getItem(`${repo.name}-buildTime`)
+                        ).toLocaleString()
+                      : "Never"}
                   </span>
-
                 </div>
               </div>
             </CardContent>

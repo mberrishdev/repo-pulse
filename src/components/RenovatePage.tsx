@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusIndicator } from "@/components/StatusIndicator";
-import { GitPullRequest, Send, RefreshCw, ExternalLink } from "lucide-react";
+import { GitPullRequest, Send, RefreshCw, ExternalLink, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface PullRequest {
   id: string;
   title: string;
+  description: string;
   repositories: PullRequestRepository[];
   status: "draft" | "active";
   validationStatus: string;
@@ -66,6 +67,7 @@ interface AzureDevOpsPR {
       uniqueName: string;
     };
   }>;
+  description?: string; // Added description to AzureDevOpsPR
 }
 
 interface RepoBuildStatus {
@@ -79,7 +81,6 @@ export const RenovatePage = () => {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [config, setConfig] = useState<Config | null>(null);
-  //const [buildStatuses, setBuildStatuses] = useState<Record<string, RepoBuildStatus>>({}); // pr.id -> repoName -> status
 
   const fetchRenovatePRs = async (config: Config) => {
     if (!config.renovate.enabled) return [];
@@ -120,6 +121,7 @@ export const RenovatePage = () => {
             groupedPRs[pr.title] = {
               id: pr.pullRequestId.toString(),
               title: pr.title,
+              description: pr.description || '',
               repositories: [],
               status: prStatus,
               validationStatus: "todo change" as const,
@@ -128,7 +130,7 @@ export const RenovatePage = () => {
           }
           console.log(groupedPRs, pr.repository.name);
           //if (!groupedPRs[pr.title].repositories.includes(pr.repository.name)) {
-            var pullRequestRepository = {
+            const pullRequestRepository = {
               name: pr.repository.name,
               prUrl: `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`
             }
@@ -163,68 +165,6 @@ export const RenovatePage = () => {
     loadConfig();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchBuildStatuses = async () => {
-  //     if (!config) return;
-  //     const statuses: Record<string, RepoBuildStatus> = {};
-  //     for (const pr of pullRequests) {
-  //       statuses[pr.id] = {};
-  //       for (const repoName of pr.repositories) {
-  //         const repoConfig = config.repositories.find(r => r.name === repoName);
-  //         if (!repoConfig) continue;
-  //         const branchNames = [
-  //           `refs/pull/${pr.id}/merge`,
-  //           `refs/pull/${pr.id}/head`,
-  //           `refs/heads/${repoConfig.branch}`
-  //         ];
-  //         let build = null;
-  //         for (const branchName of branchNames) {
-  //           const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/build/builds?definitions=${repoConfig.pipelineId}&branchName=${encodeURIComponent(branchName)}&reason=pullRequest&$top=1&api-version=6.0`;
-  //           try {
-  //             const response = await fetch(apiUrl, {
-  //               headers: {
-  //                 'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
-  //                 'Content-Type': 'application/json',
-  //               },
-  //             });
-  //             if (!response.ok) throw new Error('Failed to fetch build status');
-  //             const data = await response.json();
-  //             if (data.value && data.value.length > 0) {
-  //               build = data.value[0];
-  //               break;
-  //             }
-  //           } catch (e) {
-  //             console.error(`Failed to fetch build status for ${repoName} on branch ${branchName}:`, e);
-  //           }
-  //         }
-  //         let status: RepoBuildStatus[string]["status"] = "unknown";
-  //         let buildUrl: string | undefined = undefined;
-  //         if (build) {
-  //           switch (build.result) {
-  //             case "succeeded": status = "succeeded"; break;
-  //             case "failed": status = "failed"; break;
-  //             case "canceled": status = "canceled"; break;
-  //             case "partiallySucceeded": status = "partiallySucceeded"; break;
-  //             default:
-  //               switch (build.status) {
-  //                 case "inProgress": status = "inProgress"; break;
-  //                 case "cancelling": status = "cancelling"; break;
-  //                 case "notStarted": status = "notStarted"; break;
-  //                 default: status = "unknown";
-  //               }
-  //           }
-  //           buildUrl = build._links?.web?.href || build.url;
-  //         }
-  //         statuses[pr.id][repoName] = { status, buildUrl };
-  //       }
-  //     }
-  //     setBuildStatuses(statuses);
-  //   };
-  //   if (pullRequests.length && config) {
-  //     fetchBuildStatuses();
-  //   }
-  // }, [pullRequests, config]);
-
   const refreshPRs = async () => {
     if (!config) return;
     
@@ -240,92 +180,6 @@ export const RenovatePage = () => {
       });
     } finally {
       setIsRefreshing(false);
-    }
-  };
-
-  const publishPR = async (prId: string, prTitle: string, repoNames: string[]) => {
-    if (!config) return;
-    let allSuccess = true;
-    for (const repoName of repoNames) {
-      const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/git/repositories/${repoName}/pullRequests/${prId}?api-version=6.0`;
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ isDraft: false }),
-        });
-        if (!response.ok) {
-          allSuccess = false;
-          toast({
-            title: "Error",
-            description: `Failed to publish PR for ${repoName}.`,
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        allSuccess = false;
-        toast({
-          title: "Error",
-          description: `Failed to publish PR for ${repoName}.`,
-          variant: "destructive",
-        });
-      }
-    }
-    if (allSuccess) {
-      toast({
-        title: "PR Published",
-        description: `"${prTitle}" has been published for all affected repositories.`,
-      });
-    }
-    // Optionally, refresh PRs after publishing
-    refreshPRs();
-  };
-
-  const publishAllPRs = async () => {
-    for (const pr of pullRequests) {
-      //await publishPR(pr.id, pr.title, pr.repositories);
-    }
-  };
-
-
-  const triggerBuild = async (repoName: string) => {
-    if (!config) return;
-    const repoConfig = config.repositories.find(r => r.name === repoName);
-    if (!repoConfig) return;
-    const apiUrl = `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_apis/build/builds?api-version=6.0`;
-    try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${btoa(':' + config.azureDevOps.personalAccessToken)}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          definition: { id: repoConfig.pipelineId },
-          sourceBranch: `refs/heads/${repoConfig.branch}`,
-        }),
-      });
-      if (!response.ok) {
-        toast({
-          title: 'Build Trigger Failed',
-          description: `Failed to trigger build for ${repoName}.`,
-          variant: 'destructive',
-        });
-        return;
-      }
-      toast({
-        title: 'Build Triggered',
-        description: `Build triggered for ${repoName} on branch ${repoConfig.branch}.`,
-      });
-    } catch (error) {
-      toast({
-        title: 'Build Trigger Failed',
-        description: `Failed to trigger build for ${repoName}.`,
-        variant: 'destructive',
-      });
     }
   };
 
@@ -346,13 +200,6 @@ export const RenovatePage = () => {
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>Refresh PRs</span>
           </Button>
-          {/* <Button
-            onClick={publishAllPRs}
-            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
-          >
-            <Send className="w-4 h-4" />
-            <span>Publish All PRs</span>
-          </Button> */}
         </div>
       </div>
 
@@ -378,16 +225,7 @@ export const RenovatePage = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  {/* <StatusIndicator status={pr.validationStatus} showLabel /> */}
-                  {/* {pr.status === "draft" && (
-                    <Button 
-                      onClick={() => publishPR(pr.id, pr.title, pr.repositories)}
-                      className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Send className="w-4 h-4" />
-                      <span>Publish PR</span>
-                    </Button>
-                  )} */}
+                 
                 </div>
               </div>
             </CardHeader>
@@ -400,59 +238,31 @@ export const RenovatePage = () => {
                     const pipelineUrl = repoConfig
                       ? `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repoConfig.pipelineId}&branchName=${encodeURIComponent(repoConfig.branch)}`
                       : null;
-                    // const buildStatus = buildStatuses[pr.id]?.[repo.name]?.status || "unknown";
-                    // const buildUrl = buildStatuses[pr.id]?.[repo.name]?.buildUrl;
                     return (
-                      <span key={repo.name} className="flex items-center gap-1">
-                        <Badge variant="outline" className="text-xs">
-                          <a href={repo.prUrl} target="_blank" rel="noopener noreferrer"  className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1">
+                      <div key={repo.name} className="flex flex-col gap-1 border rounded p-2 bg-gray-50 min-w-[200px]">
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="text-xs">
+                            <a href={repo.prUrl} target="_blank" rel="noopener noreferrer" className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1">
                               {repo.name}
-                            <ExternalLink className="w-4 h-4 text-blue-600" />
-                          </a>
-                        </Badge>
-                        {/* {buildStatus !== "unknown" && (
-                          <span title={`Build status: ${buildStatus}`}>{
-                            buildStatus === "succeeded" ? "✅" :
-                            buildStatus === "failed" ? "❌" :
-                            buildStatus === "inProgress" ? "⏳" :
-                            buildStatus === "canceled" ? "🚫" :
-                            buildStatus === "partiallySucceeded" ? "⚠️" :
-                            buildStatus === "notStarted" ? "🕒" :
-                            "❔"
-                          }</span>
-                        )}
-                        {buildUrl && (
-                          <a
-                            href={buildUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-0.5 rounded hover:bg-gray-200"
-                            title="View Latest Build"
-                          >
-                            <ExternalLink className="w-4 h-4 text-blue-600" />
-                          </a>
-                        )}
-                        {pipelineUrl && !buildUrl && (
-                          <a
-                            href={pipelineUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-0.5 rounded hover:bg-gray-200"
-                            title="View Build Pipeline"
-                          >
-                            <ExternalLink className="w-4 h-4 text-blue-600" />
-                          </a>
-                        )} */}
-                        {/* <Button
-                          size="icon"
-                          variant="outline"
-                          className="ml-1"
-                          title="Trigger Build"
-                          onClick={() => triggerBuild(repo)}
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                        </Button> */}
-                      </span>
+                              <ExternalLink className="w-4 h-4 text-blue-600" />
+                            </a>
+                          </Badge>
+                          {/* {pipelineUrl && (
+                            <a
+                              href={pipelineUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-0.5 rounded hover:bg-gray-200"
+                              title="View Build Pipeline"
+                            >
+                              <ExternalLink className="w-4 h-4 text-blue-600" />
+                            </a>
+                          )} */}
+                        </div>
+                        <div className="text-xs text-gray-700 mt-1 whitespace-pre-line">
+                          {pr.description || "No description."}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
