@@ -16,66 +16,68 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system" storageKey="repopulse-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/repositories" element={
-              <div className="min-h-screen bg-background">
-                <SidebarProvider>
-                  <div className="flex min-h-screen w-full">
-                    <AppSidebar />
-                    <div className="flex-1 flex flex-col">
-                      <Header />
-                      <main className="flex-1 p-6">
-                        <RepositoriesPage />
-                      </main>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system" storageKey="repopulse-theme">
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/repositories" element={
+                <div className="min-h-screen bg-background">
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AppSidebar />
+                      <div className="flex-1 flex flex-col">
+                        <Header />
+                        <main className="flex-1 p-6">
+                          <RepositoriesPage />
+                        </main>
+                      </div>
                     </div>
-                  </div>
-                </SidebarProvider>
-              </div>
-            } />
-            <Route path="/renovate" element={
-              <div className="min-h-screen bg-background">
-                <SidebarProvider>
-                  <div className="flex min-h-screen w-full">
-                    <AppSidebar />
-                    <div className="flex-1 flex flex-col">
-                      <Header />
-                      <main className="flex-1 p-6">
-                        <RenovatePage />
-                      </main>
+                  </SidebarProvider>
+                </div>
+              } />
+              <Route path="/renovate" element={
+                <div className="min-h-screen bg-background">
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AppSidebar />
+                      <div className="flex-1 flex flex-col">
+                        <Header />
+                        <main className="flex-1 p-6">
+                          <RenovatePage />
+                        </main>
+                      </div>
                     </div>
-                  </div>
-                </SidebarProvider>
-              </div>
-            } />
-            <Route path="/settings" element={
-              <div className="min-h-screen bg-background">
-                <SidebarProvider>
-                  <div className="flex min-h-screen w-full">
-                    <AppSidebar />
-                    <div className="flex-1 flex flex-col">
-                      <Header />
-                      <main className="flex-1 p-6">
-                        <SettingsPage />
-                      </main>
+                  </SidebarProvider>
+                </div>
+              } />
+              <Route path="/settings" element={
+                <div className="min-h-screen bg-background">
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AppSidebar />
+                      <div className="flex-1 flex flex-col">
+                        <Header />
+                        <main className="flex-1 p-6">
+                          <SettingsPage />
+                        </main>
+                      </div>
                     </div>
-                  </div>
-                </SidebarProvider>
-              </div>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+                  </SidebarProvider>
+                </div>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
