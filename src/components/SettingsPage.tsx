@@ -349,6 +349,18 @@ export const SettingsPage = () => {
                         </div>
                         <div>
                           <label className="text-xs font-medium text-muted-foreground">
+                            Pipeline ID
+                          </label>
+                          <input
+                            className="w-full border rounded p-1 text-xs text-foreground"
+                            value={repo.pipelineId}
+                            onChange={(e) =>
+                              handleRepoField(idx, "pipelineId", e.target.value)
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground">
                             Main Branch
                           </label>
                           <input
@@ -585,7 +597,19 @@ export const SettingsPage = () => {
                       </div>
                       <div>
                         <label className="text-xs font-medium text-muted-foreground">
-                          Branch
+                          Pipeline ID
+                        </label>
+                        <input
+                          className="w-full border rounded p-1 text-xs text-foreground"
+                          value={repo.pipelineId}
+                          onChange={(e) =>
+                            handleRepoField(idx, "pipelineId", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Main Branch
                         </label>
                         <input
                           className="w-full border rounded p-1 text-xs text-foreground"
@@ -616,7 +640,7 @@ export const SettingsPage = () => {
                 <h3 className="font-semibold mb-2 text-foreground">Renovate</h3>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">
+                    <label className="text-xs font-medium text-muted-foreground mr-2">
                       Enabled
                     </label>
                     <input
@@ -650,11 +674,15 @@ export const SettingsPage = () => {
                 onClick={() => {
                   setConfig(editConfig);
                   setEditOpen(false);
+                }}
+              >
+                Save
+              </Button>
+              <Button
+                onClick={() => {
+                  setConfig(editConfig);
+                  setEditOpen(false);
                   downloadConfig(editConfig);
-                  toast({
-                    title: "Config Updated",
-                    description: "Configuration updated and downloaded.",
-                  });
                 }}
               >
                 Save & Download
