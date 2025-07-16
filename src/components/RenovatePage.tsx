@@ -239,7 +239,7 @@ export const RenovatePage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-foreground">
             {pullRequests.length} Renovate PRs
           </h1>
         </div>
@@ -264,13 +264,13 @@ export const RenovatePage = () => {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-3">
-                  <GitPullRequest className="w-5 h-5 text-blue-600 mt-1" />
+                  <GitPullRequest className="w-5 h-5 text-primary mt-1" />
                   <div>
-                    <CardTitle className="text-lg font-medium text-gray-900">
+                    <CardTitle className="text-lg font-medium text-foreground">
                       {pr.title}
                     </CardTitle>
                     <div className="flex items-center space-x-2 mt-2">
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-muted-foreground">
                         {pr.repositories.length} repositories
                       </span>
                     </div>
@@ -281,7 +281,7 @@ export const RenovatePage = () => {
             </CardHeader>
             <CardContent className="pt-0">
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">
+                <p className="text-sm font-medium text-muted-foreground mb-2">
                   Affected Repositories:
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -290,11 +290,7 @@ export const RenovatePage = () => {
                       (r) => r.name === repo.name
                     );
                     const pipelineUrl = repoConfig
-                      ? `${config.azureDevOps.baseUrl}/${
-                          config.azureDevOps.organization
-                        }/${config.azureDevOps.project}/_build?definitionId=${
-                          repoConfig.pipelineId
-                        }&branchName=${encodeURIComponent(repoConfig.branch)}`
+                      ? `${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repoConfig.pipelineId}&branchName=${encodeURIComponent(repoConfig.branch)}`
                       : null;
                     return (
                       <div
@@ -314,10 +310,10 @@ export const RenovatePage = () => {
                               href={repo.prUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1"
+                              className="p-0.5 rounded hover:bg-accent flex items-center gap-1"
                             >
                               {repo.name}
-                              <ExternalLink className="w-4 h-4 text-blue-600" />
+                              <ExternalLink className="w-4 h-4 text-primary" />
                             </a>
                           </Badge>
 
@@ -328,10 +324,10 @@ export const RenovatePage = () => {
                                   href={repo.buildStatus.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="p-0.5 rounded hover:bg-gray-200 flex items-center gap-1"
+                                  className="p-0.5 rounded hover:bg-accent flex items-center gap-1"
                                 >
                                   Build {repo.buildStatus.result}
-                                  <ExternalLink className="w-4 h-4 text-blue-600" />
+                                  <ExternalLink className="w-4 h-4 text-primary" />
                                 </a>
                               </Badge>
                             </div>

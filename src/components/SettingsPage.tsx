@@ -197,8 +197,8 @@ export const SettingsPage = () => {
 
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <h2 className="text-xl font-bold mb-4">No configuration found</h2>
-        <p className="mb-4 text-gray-600">
+        <h2 className="text-xl font-bold mb-4 text-foreground">No configuration found</h2>
+        <p className="mb-4 text-muted-foreground">
           Your configuration is empty. Please import a <code>config.json</code>{" "}
           or create a new one to get started.
         </p>
@@ -240,21 +240,21 @@ export const SettingsPage = () => {
         </div>
         {/* Modal for creating new config */}
         {editOpen && editConfig && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
-              <h2 className="text-lg font-bold mb-2">Create Configuration</h2>
+          <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50">
+            <div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
+              <h2 className="text-lg font-bold mb-2 text-foreground">Create Configuration</h2>
               {/* ... reuse the form UI for editing config ... */}
               <div className="space-y-4">
                 {/* Azure DevOps Section */}
                 <div>
-                  <h3 className="font-semibold mb-2">Azure DevOps</h3>
+                  <h3 className="font-semibold mb-2 text-foreground">Azure DevOps</h3>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Base URL
                       </label>
                       <input
-                        className="w-full border rounded p-1 text-sm"
+                        className="w-full border rounded p-1 text-sm text-foreground"
                         value={editConfig.azureDevOps.baseUrl}
                         onChange={(e) =>
                           handleEditField(
@@ -266,11 +266,11 @@ export const SettingsPage = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Organization
                       </label>
                       <input
-                        className="w-full border rounded p-1 text-sm"
+                        className="w-full border rounded p-1 text-sm text-foreground"
                         value={editConfig.azureDevOps.organization}
                         onChange={(e) =>
                           handleEditField(
@@ -282,11 +282,11 @@ export const SettingsPage = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Project
                       </label>
                       <input
-                        className="w-full border rounded p-1 text-sm"
+                        className="w-full border rounded p-1 text-sm text-foreground"
                         value={editConfig.azureDevOps.project}
                         onChange={(e) =>
                           handleEditField(
@@ -298,11 +298,11 @@ export const SettingsPage = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Personal Access Token
                       </label>
                       <input
-                        className="w-full border rounded p-1 text-sm"
+                        className="w-full border rounded p-1 text-sm text-foreground"
                         value={editConfig.azureDevOps.personalAccessToken}
                         onChange={(e) =>
                           handleEditField(
@@ -317,19 +317,19 @@ export const SettingsPage = () => {
                 </div>
                 {/* Repositories Section */}
                 <div>
-                  <h3 className="font-semibold mb-2">Repositories</h3>
+                  <h3 className="font-semibold mb-2 text-foreground">Repositories</h3>
                   {editConfig.repositories.map((repo, idx) => (
                     <div
                       key={idx}
-                      className="border rounded p-2 mb-2 bg-gray-50"
+                      className="border rounded p-2 mb-2 bg-muted"
                     >
                       <div className="grid grid-cols-4 gap-2">
                         <div>
-                          <label className="text-xs font-medium text-gray-700">
+                          <label className="text-xs font-medium text-muted-foreground">
                             Name
                           </label>
                           <input
-                            className="w-full border rounded p-1 text-xs"
+                            className="w-full border rounded p-1 text-xs text-foreground"
                             value={repo.name}
                             onChange={(e) =>
                               handleRepoField(idx, "name", e.target.value)
@@ -337,11 +337,11 @@ export const SettingsPage = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-gray-700">
+                          <label className="text-xs font-medium text-muted-foreground">
                             Repo Path
                           </label>
                           <input
-                            className="w-full border rounded p-1 text-xs"
+                            className="w-full border rounded p-1 text-xs text-foreground"
                             value={repo.url}
                             onChange={(e) =>
                               handleRepoField(idx, "url", e.target.value)
@@ -349,11 +349,11 @@ export const SettingsPage = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-gray-700">
+                          <label className="text-xs font-medium text-muted-foreground">
                             Pipeline ID
                           </label>
                           <input
-                            className="w-full border rounded p-1 text-xs"
+                            className="w-full border rounded p-1 text-xs text-foreground"
                             value={repo.pipelineId}
                             onChange={(e) =>
                               handleRepoField(idx, "pipelineId", e.target.value)
@@ -361,11 +361,11 @@ export const SettingsPage = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-gray-700">
+                          <label className="text-xs font-medium text-muted-foreground">
                             Main Branch
                           </label>
                           <input
-                            className="w-full border rounded p-1 text-xs"
+                            className="w-full border rounded p-1 text-xs text-foreground"
                             value={repo.branch}
                             onChange={(e) =>
                               handleRepoField(idx, "branch", e.target.value)
@@ -390,14 +390,14 @@ export const SettingsPage = () => {
                 </div>
                 {/* Renovate Section */}
                 <div>
-                  <h3 className="font-semibold mb-2">Renovate</h3>
+                  <h3 className="font-semibold mb-2 text-foreground">Renovate</h3>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Bot Name
                       </label>
                       <input
-                        className="w-full border rounded p-1 text-sm"
+                        className="w-full border rounded p-1 text-sm text-foreground"
                         value={editConfig.renovate.botName}
                         onChange={(e) =>
                           handleEditField("renovate", "botName", e.target.value)
@@ -435,8 +435,8 @@ export const SettingsPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted-foreground mt-1">
             View and manage RepoPulse configuration
           </p>
         </div>
@@ -458,7 +458,7 @@ export const SettingsPage = () => {
             <span>Download</span>
           </Button>
           <Button
-            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
+            className="flex items-center space-x-2 bg-primary hover:bg-primary/90"
             onClick={() => {
               setEditConfig(config);
               setEditOpen(true);
@@ -472,20 +472,20 @@ export const SettingsPage = () => {
 
       {/* Modal for editing config as a form */}
       {editOpen && editConfig && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-lg font-bold mb-2">Edit Configuration</h2>
+        <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
+            <h2 className="text-lg font-bold mb-2 text-foreground">Edit Configuration</h2>
             <div className="space-y-4">
               {/* Azure DevOps Section */}
               <div>
-                <h3 className="font-semibold mb-2">Azure DevOps</h3>
+                <h3 className="font-semibold mb-2 text-foreground">Azure DevOps</h3>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-muted-foreground">
                       Organization
                     </label>
                     <input
-                      className="w-full border rounded p-1 text-sm"
+                      className="w-full border rounded p-1 text-sm text-foreground"
                       value={editConfig.azureDevOps.organization}
                       onChange={(e) =>
                         handleEditField(
@@ -497,11 +497,11 @@ export const SettingsPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-muted-foreground">
                       Project
                     </label>
                     <input
-                      className="w-full border rounded p-1 text-sm"
+                      className="w-full border rounded p-1 text-sm text-foreground"
                       value={editConfig.azureDevOps.project}
                       onChange={(e) =>
                         handleEditField(
@@ -513,11 +513,11 @@ export const SettingsPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-muted-foreground">
                       Personal Access Token
                     </label>
                     <input
-                      className="w-full border rounded p-1 text-sm"
+                      className="w-full border rounded p-1 text-sm text-foreground"
                       value={editConfig.azureDevOps.personalAccessToken}
                       onChange={(e) =>
                         handleEditField(
@@ -529,11 +529,11 @@ export const SettingsPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-muted-foreground">
                       Base URL
                     </label>
                     <input
-                      className="w-full border rounded p-1 text-sm"
+                      className="w-full border rounded p-1 text-sm text-foreground"
                       value={editConfig.azureDevOps.baseUrl}
                       onChange={(e) =>
                         handleEditField(
@@ -548,16 +548,16 @@ export const SettingsPage = () => {
               </div>
               {/* Repositories Section */}
               <div>
-                <h3 className="font-semibold mb-2">Repositories</h3>
+                <h3 className="font-semibold mb-2 text-foreground">Repositories</h3>
                 {editConfig.repositories.map((repo, idx) => (
-                  <div key={idx} className="border rounded p-2 mb-2 bg-gray-50">
+                  <div key={idx} className="border rounded p-2 mb-2 bg-muted">
                     <div className="grid grid-cols-4 gap-2">
                       <div>
-                        <label className="text-xs font-medium text-gray-700">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Name
                         </label>
                         <input
-                          className="w-full border rounded p-1 text-xs"
+                          className="w-full border rounded p-1 text-xs text-foreground"
                           value={repo.name}
                           onChange={(e) =>
                             handleRepoField(idx, "name", e.target.value)
@@ -565,11 +565,11 @@ export const SettingsPage = () => {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-medium text-gray-700">
+                        <label className="text-xs font-medium text-muted-foreground">
                           URL
                         </label>
                         <input
-                          className="w-full border rounded p-1 text-xs"
+                          className="w-full border rounded p-1 text-xs text-foreground"
                           value={repo.url}
                           onChange={(e) =>
                             handleRepoField(idx, "url", e.target.value)
@@ -577,11 +577,11 @@ export const SettingsPage = () => {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-medium text-gray-700">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Pipeline ID
                         </label>
                         <input
-                          className="w-full border rounded p-1 text-xs"
+                          className="w-full border rounded p-1 text-xs text-foreground"
                           value={repo.pipelineId}
                           onChange={(e) =>
                             handleRepoField(idx, "pipelineId", e.target.value)
@@ -589,11 +589,11 @@ export const SettingsPage = () => {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-medium text-gray-700">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Branch
                         </label>
                         <input
-                          className="w-full border rounded p-1 text-xs"
+                          className="w-full border rounded p-1 text-xs text-foreground"
                           value={repo.branch}
                           onChange={(e) =>
                             handleRepoField(idx, "branch", e.target.value)
@@ -618,14 +618,14 @@ export const SettingsPage = () => {
               </div>
               {/* Renovate Section */}
               <div>
-                <h3 className="font-semibold mb-2">Renovate</h3>
+                <h3 className="font-semibold mb-2 text-foreground">Renovate</h3>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-muted-foreground">
                       Bot Name
                     </label>
                     <input
-                      className="w-full border rounded p-1 text-sm"
+                      className="w-full border rounded p-1 text-sm text-foreground"
                       value={editConfig.renovate.botName}
                       onChange={(e) =>
                         handleEditField("renovate", "botName", e.target.value)
@@ -669,24 +669,24 @@ export const SettingsPage = () => {
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   Organization
                 </label>
-                <p className="text-gray-900">
+                <p className="text-foreground">
                   {config.azureDevOps.organization}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   Project
                 </label>
-                <p className="text-gray-900">{config.azureDevOps.project}</p>
+                <p className="text-foreground">{config.azureDevOps.project}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   Personal Access Token
                 </label>
-                <p className="text-gray-900">
+                <p className="text-foreground">
                   {config.azureDevOps.personalAccessToken}
                 </p>
               </div>
@@ -702,34 +702,34 @@ export const SettingsPage = () => {
           <CardContent>
             <div className="space-y-4">
               {config.repositories.map((repo, index) => (
-                <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                <div key={index} className="border rounded-lg p-4 bg-muted">
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">
+                      <label className="text-sm font-medium text-muted-foreground">
                         Name
                       </label>
-                      <p className="text-gray-900 font-mono text-sm">
+                      <p className="text-foreground font-mono text-sm">
                         {repo.name}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">
+                      <label className="text-sm font-medium text-muted-foreground">
                         Pipeline ID
                       </label>
-                      <p className="text-gray-900">{repo.pipelineId}</p>
+                      <p className="text-foreground">{repo.pipelineId}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">
+                      <label className="text-sm font-medium text-muted-foreground">
                         Branch
                       </label>
-                      <p className="text-gray-900">{repo.branch}</p>
+                      <p className="text-foreground">{repo.branch}</p>
                     </div>
                   </div>
                   <div className="mt-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-muted-foreground">
                       URL
                     </label>
-                    <p className="text-gray-600 text-sm break-all">
+                    <p className="text-muted-foreground text-sm break-all">
                       {repo.url.startsWith("http")
                         ? repo.url
                         : `${config.azureDevOps.baseUrl}${repo.url}`}
@@ -756,13 +756,13 @@ export const SettingsPage = () => {
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   Bot Name
                 </label>
-                <p className="text-gray-900">{config.renovate.botName}</p>
+                <p className="text-foreground">{config.renovate.botName}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   Auto Merge
                 </label>
               </div>
@@ -776,7 +776,7 @@ export const SettingsPage = () => {
             <CardTitle>Raw Configuration (config.json)</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="bg-gray-100 p-4 rounded-lg text-sm overflow-x-auto border">
+            <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto border">
               <code>{JSON.stringify(config, null, 2)}</code>
             </pre>
           </CardContent>

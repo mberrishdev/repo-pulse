@@ -1,5 +1,4 @@
-
-import { Home, GitBranch, RefreshCw, Settings } from "lucide-react";
+import { Home, GitBranch, Settings } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
@@ -20,7 +19,7 @@ const items = [
   },
   {
     title: "Renovate",
-    url: "/renovate", 
+    url: "/renovate",
     icon: GitBranch,
   },
   {
@@ -34,9 +33,9 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar className="">
+    <Sidebar className="bg-background">
       <SidebarHeader className="p-4">
-        <h2 className="text-xl font-bold text-gray-900">RepoPulse</h2>
+        <h2 className="text-xl font-bold text-foreground">RepoPulse</h2>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -44,7 +43,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
+                  <SidebarMenuButton
                     asChild
                     isActive={location.pathname === item.url}
                   >

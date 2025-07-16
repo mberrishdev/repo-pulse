@@ -142,8 +142,8 @@ export const RepositoriesPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Repositories</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Repositories</h1>
+          <p className="text-muted-foreground mt-1">
             Monitor and manage CI pipelines for all repositories
           </p>
         </div>
@@ -162,7 +162,7 @@ export const RepositoriesPage = () => {
           <Button
             onClick={triggerAllPipelines}
             disabled={triggeringAll}
-            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
+            className="flex items-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <PlayCircle className="w-4 h-4" />
             <span>
@@ -180,7 +180,7 @@ export const RepositoriesPage = () => {
                 <div className="flex items-center space-x-4">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold text-lg text-gray-900">
+                      <h3 className="font-semibold text-lg text-foreground">
                         {repo.name}
                       </h3>
                       <a
@@ -191,20 +191,20 @@ export const RepositoriesPage = () => {
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         Pipeline ID: {repo.pipelineId}
                       </p>
                       <a
                         href={`${config.azureDevOps.baseUrl}/${config.azureDevOps.organization}/${config.azureDevOps.project}/_build?definitionId=${repo.pipelineId}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         <ExternalLink className="w-4 h-4" />
                       </a>
@@ -231,7 +231,7 @@ export const RepositoriesPage = () => {
                     <span>Trigger CI</span>
                   </Button>
 
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     Build Time:{" "}
                     {localStorage.getItem(`${repo.name}-buildTime`)
                       ? new Date(
