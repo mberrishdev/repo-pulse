@@ -165,10 +165,13 @@ export const RenovatePage = () => {
   useEffect(() => {
     const configData = loadConfigFromLocalStorage();
 
+    console.log("asda");
     if (!configData) {
       navigate("/settings");
       return;
     }
+
+    console.log(configData);
     setConfig(configData);
 
     if (configData.renovate.enabled) {
@@ -259,6 +262,12 @@ export const RenovatePage = () => {
           </Button>
         </div>
       </div>
+
+      { config && !config.renovate.enabled && (
+        <p className="text-sm text-red-600 mt-2">
+          ⚠️ Renovate is currently disabled. Enable it in your configuration to receive dependency updates.
+        </p>
+      )}
 
       <div className="grid gap-4">
         {pullRequests.map((pr) => (

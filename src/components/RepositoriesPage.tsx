@@ -23,11 +23,6 @@ export const RepositoriesPage = () => {
     }
 
     setConfig(configData);
-
-    if (configData) {
-      refreshStatuses();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const refreshStatuses = async () => {

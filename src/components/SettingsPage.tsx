@@ -707,6 +707,14 @@ export const SettingsPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
+                  Base Url
+                </label>
+                <p className="text-foreground">
+                  {config.azureDevOps.baseUrl}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
                   Organization
                 </label>
                 <p className="text-foreground">
