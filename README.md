@@ -5,7 +5,7 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Repository Dashboard:**  
   - View all configured repositories and their pipeline status.
@@ -29,15 +29,7 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
 
 ---
 
-## 🛠️ Technologies Used
-
-- **Frontend:** React, TypeScript, Vite, shadcn-ui, Tailwind CSS
-- **Icons:** Lucide
-- **State & UI:** React hooks, custom toasts, and modals
-
----
-
-## ⚙️ Configuration
+##  Configuration
 
 - **Configuration is now stored securely in your browser's localStorage.**
 - **You must import a config.json file or create one manually via the Settings page.**
@@ -86,19 +78,19 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
 
 ---
 
-## ⚠️ Security Note
+##  Security Note
 
 > **Do NOT expose your Personal Access Token (PAT) in production frontend code.**  
 > Azure DevOps REST APIs do not support CORS, so all API calls requiring a PAT must be proxied through a secure backend.
 
 ---
 
-## 🖥️ Local Development
+## Local Development
 
 1. **Clone the repository:**
    ```sh
-   git clone <YOUR_GIT_URL>
-   cd <YOUR_PROJECT_NAME>
+   git clone https://github.com/mberrishdev/repo-pulse
+   cd repo-pulse
    ```
 
 2. **Install dependencies:**
@@ -118,7 +110,7 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
 
 ---
 
-## 🧩 Main Pages
+## Main Pages
 
 - **Repositories:**  
   Monitor and trigger CI pipelines for all configured repositories.
@@ -131,7 +123,7 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
 
 ---
 
-## 📝 Customization
+## Customization
 
 - **Add/Remove Repositories:**  
   Use the Settings page to manage your repository list and pipeline settings.
@@ -144,14 +136,14 @@ It provides a beautiful, unified UI for DevOps teams to track repository health,
 
 ---
 
-## 🛡️ Production Deployment
+## Production Deployment
 
 - **You must use a backend to proxy Azure DevOps API calls.**  
   This app is designed for internal/dev use or with a secure backend proxy.
 
 ---
  
-## 📄 License
+## License
 
 MIT
 
@@ -159,20 +151,6 @@ MIT
 
 If you have questions or need help, open an issue or contact the maintainer.
 
----
-
-## 🐳 Docker Usage
-
-You can build and run RepoPulse as a Docker container:
-
-1. **Build the Docker image:**
-   ```sh
-   docker build -t repopulse .
-   ```
-
-2. **Run the container:**
-   ```sh
-   docker run -p 5050:80 -d repopulse
    ```
    The app will be available at [http://localhost:5050](http://localhost:5050).
 
